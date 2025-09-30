@@ -1,10 +1,14 @@
 const express = require('express')
-const app = express()
+const bodyParser = require('body-parser');
 const loginRouter = require('./routers/loginRouters')
-const barangRouter = require('./routers/barangRouters')
+const barangRoutes = require('./routers/barangRouters');
 
+const app = express()
+app.use(bodyParser.json());
 app.use(express.json())
+
 app.use('/', loginRouter)
+app.use('/api', barangRoutes);
 
 
 const PORT = 3000
