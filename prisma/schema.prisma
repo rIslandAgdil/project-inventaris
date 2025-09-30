@@ -19,8 +19,8 @@ model Barang {
   kode_inventaris Int     @unique
   jumlah          Int
   kondisi         String
-  ruanganId       Int     @unique(map: "ruanganId")
-  userId          Int     @unique(map: "userId")
+  ruanganId       Int     
+  userId          Int     
   User            User    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Ruangan         Ruangan @relation(fields: [ruanganId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
