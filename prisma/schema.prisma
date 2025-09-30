@@ -6,10 +6,35 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model Barang {
+  id              Int     @id @default(autoincrement())
+  nama_barang     String  @db.Text
+  kode_inventaris Int     @unique
+  jumlah          Int
+  kondisi         String
+  ruanganId       Int     @unique(map: "ruanganId")
+  userId          Int     @unique(map: "userId")
+  User            User    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Ruangan         Ruangan @relation(fields: [ruanganId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  username    String    @db.VarChar(255)
+  email       String    @unique(map: "email") @db.VarChar(255)
+  password    String
+  Barang      Barang[]    
+}
+
+model Ruangan {
+  id              Int     @id @default(autoincrement())
+  nama_ruangan    String  @db.VarChar(255)
+  Barang          Barang[]
 }
