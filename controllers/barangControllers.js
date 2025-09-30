@@ -33,7 +33,7 @@ exports.getBarangBy = async (req, res) => {
        const barang = await prisma.barang.findUnique({
         where : {id:Number(id)},
        });
-       if (!barang) return res.status(404).json({message : 'id barang'});
+       if (!barang) return res.status(404).json({message : 'Barang tidak ditemukan'});
        res.json(barang);
     } catch (error) {
         res.status(500).json({ error: error.message});
