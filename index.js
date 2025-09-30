@@ -4,7 +4,7 @@ const loginRouter = require('./routers/loginRouters')
 const barangRouter = require('./routers/barangRouters')
 
 
-// app.use('/', loginRouter)
+app.use('/', loginRouter)
 
 
 const PORT = 3000
