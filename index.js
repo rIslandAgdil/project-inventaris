@@ -3,7 +3,7 @@ const app = express()
 const loginRouter = require('./routers/loginRouters')
 const barangRouter = require('./routers/barangRouters')
 
-
+app.use(express.json())
 app.use('/', loginRouter)
 
 
