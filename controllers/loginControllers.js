@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 
 // Controller: REGISTER user baru
 const register = async (req, res) => {
-    const { nama, email, password } = req.body
+    const { username, email, password } = req.body
 
     // Cek apakah email sudah terdaftar
     const user = await prisma.user.findFirst({
@@ -26,9 +26,9 @@ const register = async (req, res) => {
             // Simpan user baru ke database
             const newUser = await prisma.user.create({
                 data: {
-                    nama, 
+                    username, 
                     email, 
-                    password: password
+                    password
                 }
             })
 
@@ -64,7 +64,7 @@ const login = async (req, res) => {
 
     // Validasi: user harus ada + password harus cocok
     if (!user || !(password === user.password)) {
-        return res.status(401).json({ message: 'Invalid credentials' })
+        return res.status(401).json({ message: 'Username atau Password salah!' })
     }
 
     res.json({ message: 'Berhasil Login' })
