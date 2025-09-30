@@ -13,12 +13,10 @@ model barang {
   kode_inventaris Int     @unique
   jumlah          Int
   kondisi         String
-
-  ruanganId Int
-  userId    Int
-
-  ruangan   ruangan @relation(fields: [ruanganId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user      user    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ruanganId       Int
+  userId          Int
+  ruangan         ruangan @relation(fields: [ruanganId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user            user    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model ruangan {

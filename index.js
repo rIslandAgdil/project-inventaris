@@ -1,14 +1,17 @@
-const express = require('express');
+const express = require('express')
 const bodyParser = require('body-parser');
+const loginRouter = require('./routers/loginRouters')
 const barangRoutes = require('./routers/barangRouters');
 
-const app =  express();
+const app = express()
 app.use(bodyParser.json());
+app.use(express.json())
 
+app.use('/', loginRouter)
 app.use('/api', barangRoutes);
 
-const PORT = 3001;
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
 
+const PORT = 3000
+app.listen(PORT, () => {
+    console.log(`Server is listening at http://localhost:${PORT}`);
+})
