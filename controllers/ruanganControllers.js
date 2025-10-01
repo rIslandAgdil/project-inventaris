@@ -9,7 +9,7 @@ exports.createRuangan = async (req, res) => {
         const ruangan = await prisma.ruangan.create({
             data: { nama_ruangan }, 
         });
-         res.json({ message : 'Barang berhasil ditambahkan', ruangan});
+         res.json({ message : 'Ruangan berhasil ditambahkan', ruangan});
     } catch (error) {
         res.status(500).json({ error : error.message});
     }
@@ -18,7 +18,7 @@ exports.createRuangan = async (req, res) => {
 //read - semua barang
 exports.getAllRuangan = async (req, res) => {
     try {
-        const ruangan = await prisma.ruangan.findMany(); //{ include: { ruangan: true } } 
+        const ruangan = await prisma.ruangan.findMany();
         res.json(ruangan);
     } catch (error) {
         res.status(500).json({ error: error.message});
@@ -34,7 +34,7 @@ exports.updateRuangan = async (req, res) => {
             where : { id : Number(id)},
             data : {nama_ruangan}
         });
-        res.json({message : 'Data Barang Berhasil diupdate', ruangan});
+        res.json({message : 'Data Ruangan Berhasil diupdate', ruangan});
     } catch (error) {
         res.status(500).json({error : error.message});
     }
