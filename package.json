@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Risland-cpu/project-inventaris#readme",
   "dependencies": {
     "@prisma/client": "^6.16.2",
+    "bcrypt": "^6.0.0",
     "express": "^5.1.0",
     "prisma": "^6.16.2"
   }

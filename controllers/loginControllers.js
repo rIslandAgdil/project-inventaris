@@ -3,6 +3,7 @@ const { PrismaClient } = require("@prisma/client")
 
 // Membuat instance PrismaClient
 const prisma = new PrismaClient()
+const bcrypt = require('bcrypt')
 
 
 // Controller: REGISTER user baru
@@ -28,7 +29,7 @@ const register = async (req, res) => {
                 data: {
                     username, 
                     email, 
-                    password
+                    password: await bcrypt.hash(password, 10)
                 }
             })
 
@@ -63,7 +64,7 @@ const login = async (req, res) => {
     })
 
     // Validasi: user harus ada + password harus cocok
-    if (!user || !(password === user.password)) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
         return res.status(401).json({ message: 'Username atau Password salah!' })
     }
 
