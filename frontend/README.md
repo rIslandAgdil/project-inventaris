@@ -14,3 +14,15 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+/**
+ * Reusable row action buttons: View, Edit, Delete
+ *
+ * Props:
+ * - basePath: string           -> contoh "/admin", "/barang", "/ruangan"
+ * - id: string|number          -> row.id
+ * - onDelete: function         -> aksi hapus (dipanggil setelah konfirmasi OK)
+ * - getDeleteName: function    -> optional, untuk menampilkan nama di konfirmasi (e.g. () => row.username)
+ * - hideView / hideEdit / hideDelete: boolean -> optional, sembunyikan tombol tertentu
+ * - labels: { view, edit, delete }: optional   -> ganti label tombol
+ */
