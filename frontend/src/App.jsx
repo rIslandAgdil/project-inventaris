@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import ListBarang from "./pages/barang/ListBarang"; 
@@ -14,6 +15,13 @@ function Placeholder({ title }) {
       <p className="text-slate-600 mt-2">Halaman ini masih dalam tahap pengembangan.</p>
     </div>
   );
+=======
+import "./index.css";
+import Login from "./pages/Login";
+
+function App() {
+  return <Login />;
+>>>>>>> 2f180cff7db0748a515b957ed1878c21df97605b
 }
 
 export default function App() {
