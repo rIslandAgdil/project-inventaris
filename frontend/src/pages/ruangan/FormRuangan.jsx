@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
@@ -15,38 +15,31 @@ export default function FormRuangan() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const mode = useMemo(() => {
-    if (location.pathname.includes("/view/")) return "view";
-    if (id) return "edit";
-    return "create";
-  }, [id, location.pathname]);
+  const mode = location.pathname.includes("/view/")
+    ? "view"
+    : id
+    ? "edit"
+    : "create";
 
   const [form, setForm] = useState({ ruangan: "" });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!id); // loading edit/view
 
   useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => {
-      if (id) {
-        const found = DUMMY_RUANGAN.find((r) => String(r.id) === String(id));
-        if (!found) {
-          Swal.fire("Gagal", "Data tidak ditemukan (dummy)", "error");
-          navigate("/ruangan");
-          return;
-        }
-        setForm({ ruangan: found.ruangan ?? "" });
-      }
-      setLoading(false);
-    }, 200);
-    return () => clearTimeout(t);
+    if (!id) return;
+    const found = DUMMY_RUANGAN.find((r) => String(r.id) === String(id));
+    if (!found) {
+      Swal.fire("Gagal", "Data tidak ditemukan (dummy)", "error");
+      navigate("/ruangan");
+      return;
+    }
+    setForm({ ruangan: found.ruangan ?? "" });
+    setLoading(false);
   }, [id, navigate]);
 
   const readOnly = mode === "view";
   const titleMap = { create: "Tambah", edit: "Edit", view: "Detail" };
 
-  const handleChange = (e) => {
-    setForm({ ruangan: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ruangan: e.target.value });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -57,9 +50,8 @@ export default function FormRuangan() {
       return;
     }
 
-    // UI-only
-    Swal.fire("Sukses", `Data berhasil disimpan (${mode}) — UI-only`, "success");
-    navigate("/ruangan");
+    Swal.fire("Sukses", `Data berhasil disimpan (${mode}) — UI-only`, "success")
+      .then(() => navigate("/ruangan"));
   };
 
   return (
@@ -71,7 +63,7 @@ export default function FormRuangan() {
       ]}
     >
       <div className="mb-4">
-        <h2 className="text-2xl font-semibold text-blue-700">
+        <h2 className="text-2xl font-semibold text-gray-700">
           {titleMap[mode]} Ruangan
         </h2>
         <p className="text-slate-600 text-sm mt-1">

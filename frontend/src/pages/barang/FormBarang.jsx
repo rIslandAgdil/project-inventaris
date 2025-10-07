@@ -1,13 +1,10 @@
-// src/pages/barang/FormBarang.jsx
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
-// SESUAIKAN path komponen
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
 
-// Data dummy yang sama dengan list (opsional, cukup untuk demo view/edit)
 const DUMMY_BARANG = [
   { id: 1, name: "Printer",  kode_inventaris: "INV-0001", jumlah: 3, kondisi: "Baik",         ruangan: "Ruang B101", user: "Nofryanti" },
   { id: 2, name: "Switch",   kode_inventaris: "INV-0002", jumlah: 5, kondisi: "Baik",         ruangan: "IT Lab",     user: "Admin" },
@@ -15,26 +12,18 @@ const DUMMY_BARANG = [
   { id: 4, name: "Proyektor",kode_inventaris: "INV-0004", jumlah: 1, kondisi: "Baik",         ruangan: "Aula",       user: "Sari" },
 ];
 
-const ROOM_OPTIONS = [
-  "Aula",
-  "Talent Corner",
-  "Gudang TIK",
-  "Gedung 1",
-  "IT Lab",
-  "Ruang B101",
-];
-
+const ROOM_OPTIONS = ["Aula", "Talent Corner", "Gudang TIK", "Gedung 1", "IT Lab", "Ruang B101"];
 
 export default function FormBarang() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const mode = useMemo(() => {
-    if (location.pathname.includes("/view/")) return "view";
-    if (id) return "edit";
-    return "create";
-  }, [id, location.pathname]);
+  const mode = location.pathname.includes("/view/")
+    ? "view"
+    : id
+    ? "edit"
+    : "create";
 
   const [form, setForm] = useState({
     name: "",
@@ -44,30 +33,25 @@ export default function FormBarang() {
     ruangan: "",
     user: "",
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!id); // loading edit/view
 
   useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => {
-      if (id) {
-        const found = DUMMY_BARANG.find((b) => String(b.id) === String(id));
-        if (!found) {
-          Swal.fire("Gagal", "Data tidak ditemukan (dummy)", "error");
-          navigate("/barang");
-          return;
-        }
-        setForm({
-          name: found.name ?? "",
-          kode_inventaris: found.kode_inventaris ?? "",
-          jumlah: String(found.jumlah ?? ""),
-          kondisi: found.kondisi ?? "Baik",
-          ruangan: found.ruangan ?? "",
-          user: found.user ?? "",
-        });
-      }
-      setLoading(false);
-    }, 250);
-    return () => clearTimeout(t);
+    if (!id) return;
+    const found = DUMMY_BARANG.find((b) => String(b.id) === String(id));
+    if (!found) {
+      Swal.fire("Gagal", "Data tidak ditemukan (dummy)", "error");
+      navigate("/barang");
+      return;
+    }
+    setForm({
+      name: found.name ?? "",
+      kode_inventaris: found.kode_inventaris ?? "",
+      jumlah: String(found.jumlah ?? ""),
+      kondisi: found.kondisi ?? "Baik",
+      ruangan: found.ruangan ?? "",
+      user: found.user ?? "",
+    });
+    setLoading(false);
   }, [id, navigate]);
 
   const readOnly = mode === "view";
@@ -76,8 +60,7 @@ export default function FormBarang() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "jumlah") {
-      const onlyNum = value.replace(/[^\d]/g, "");
-      setForm((s) => ({ ...s, [name]: onlyNum }));
+      setForm((s) => ({ ...s, jumlah: value.replace(/[^\d]/g, "") }));
     } else {
       setForm((s) => ({ ...s, [name]: value }));
     }
@@ -87,13 +70,16 @@ export default function FormBarang() {
     e.preventDefault();
     if (readOnly) return;
 
-    if (!form.name || !form.kode_inventaris) {
+    if (!form.name.trim() || !form.kode_inventaris.trim()) {
       Swal.fire("Validasi", "Nama & Kode Inventaris wajib diisi", "warning");
       return;
     }
-    Swal.fire("Sukses", `Data berhasil disimpan (${mode}) — dummy data`, "success");
-    navigate("/barang");
+    Swal.fire("Sukses", `Data berhasil disimpan (${mode}) — dummy data`, "success")
+      .then(() => navigate("/barang"));
   };
+
+  const extraRoomOption =
+    form.ruangan && !ROOM_OPTIONS.includes(form.ruangan) ? form.ruangan : null;
 
   return (
     <PageShell
@@ -104,7 +90,7 @@ export default function FormBarang() {
       ]}
     >
       <div className="mb-4">
-        <h2 className="text-2xl font-semibold text-blue-700">{titleMap[mode]} Barang</h2>
+        <h2 className="text-2xl font-semibold text-gray-700">{titleMap[mode]} Barang</h2>
         <p className="text-slate-600 text-sm mt-1">
           Form {mode === "create" ? "penambahan" : mode === "edit" ? "pengubahan" : "detail"} barang (UI-only).
         </p>
@@ -153,7 +139,6 @@ export default function FormBarang() {
               />
             </div>
 
-            {/* ada 2 ini kondisi sama ruangan beda cara, yang ruangan pake const list di atas. */}
             <div>
               <label className="block text-sm text-slate-700 mb-1">Kondisi</label>
               <select
@@ -169,29 +154,23 @@ export default function FormBarang() {
                 <option value="Hilang">Hilang</option>
               </select>
             </div>
-               <div>
-                  <label className="block text-sm text-slate-700 mb-1">Ruangan</label>
-                  <select
-                    name="ruangan"
-                    value={form.ruangan}
-                    onChange={handleChange}
-                    disabled={readOnly}
-                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-                  >
-                    <option value=""></option>
-                    {ROOM_OPTIONS.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
 
-                    {/* kalau data lama punya ruangan yang tidak ada di daftar, tetap tampil */}
-                    {form.ruangan &&
-                      !ROOM_OPTIONS.includes(form.ruangan) && (
-                        <option value={form.ruangan}>{form.ruangan}</option>
-                      )}
-                  </select>
-              </div>
+            <div>
+              <label className="block text-sm text-slate-700 mb-1">Ruangan</label>
+              <select
+                name="ruangan"
+                value={form.ruangan}
+                onChange={handleChange}
+                disabled={readOnly}
+                className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+              >
+                <option value=""></option>
+                {ROOM_OPTIONS.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+                {extraRoomOption && <option value={extraRoomOption}>{extraRoomOption}</option>}
+              </select>
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">

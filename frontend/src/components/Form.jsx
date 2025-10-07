@@ -64,7 +64,7 @@ function Form({ mode = "create" }) {
   return (
     <div className="p-6 max-w-xl mx-auto">
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold text-blue-700 mb-4">{title}</h2>
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">{title}</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
             name="name"
