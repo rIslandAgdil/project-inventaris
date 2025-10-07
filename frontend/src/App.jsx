@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import ListBarang from "./pages/barang/ListBarang"; 
@@ -8,29 +7,11 @@ import ListRuangan from "./pages/ruangan/ListRuangan";
 import ListAdmin from "./pages/admin/ListAdmin";
 import FormAdmin from "./pages/admin/FormAdmin";
 
-function Placeholder({ title }) {
-  return (
-    <div className="p-6">
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="text-slate-600 mt-2">Halaman ini masih dalam tahap pengembangan.</p>
-    </div>
-  );
-=======
-import "./index.css";
-import Login from "./pages/Login";
-
-function App() {
-  return <Login />;
->>>>>>> 2f180cff7db0748a515b957ed1878c21df97605b
-}
-
 export default function App() {
-  // Catatan: Pastikan <BrowserRouter> membungkus <App /> di src/main.jsx
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
 
-      {/* Rute Barang */}
       <Route path="/barang" element={<ListBarang />} />
       <Route path="/barang/tambah" element={<FormBarang />} />
       <Route path="/barang/edit/:id" element={<FormBarang />} />

@@ -102,7 +102,7 @@ export default function Databarang() {
         >
     <div>
       <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-blue-700">Data barang</h2>
+        <h2 className="text-2xl font-semibold text-gray-700">Data barang</h2>
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -111,7 +111,7 @@ export default function Databarang() {
             placeholder="Cari barang / ruangan / user"
             className="border rounded-md px-3 py-2 text-sm"
           />
-          <Button onClick={() => navigate("/barang/tambah")}>+ Tambah barang</Button>
+          <Button variant="secondary" onClick={() => navigate("/barang/tambah")}>+ Tambah barang</Button>
         </div>
       </div>
 

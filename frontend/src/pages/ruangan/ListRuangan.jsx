@@ -57,7 +57,7 @@ export default function DataRuangan() {
   });
 
   const columns = [
-    { header: "No.", accessor: "no" },
+    { header: "No.", accessor: "no", hideBelow: "md" },
     { header: "Ruangan", accessor: "ruangan" },
     { header: "Barang", accessor: "barang" },
     {
@@ -81,7 +81,7 @@ export default function DataRuangan() {
   return (
     <PageShell breadcrumb={[{ label: "Home", to: "/" }, { label: "Ruangan" }]}>
       <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-blue-700">Data Ruangan</h2>
+        <h2 className="text-2xl font-semibold text-gray-700">Data Ruangan</h2>
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -90,7 +90,7 @@ export default function DataRuangan() {
             placeholder="Cari no/ruangan/barang"
             className="border rounded-md px-3 py-2 text-sm"
           />
-          <Button onClick={() => navigate("/ruangan/tambah")}>+ Tambah Ruangan</Button>
+          <Button variant="secondary" onClick={() => navigate("/ruangan/tambah")}>+ Tambah Ruangan</Button>
         </div>
       </div>
 

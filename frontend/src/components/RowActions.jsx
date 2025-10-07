@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import Button from "./Button";
-
+import ActionIcon from "./ActionIcon";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
 export default function RowActions({
   basePath,
@@ -11,7 +11,7 @@ export default function RowActions({
   hideView = false,
   hideEdit = false,
   hideDelete = false,
-  labels = { view: "View", edit: "Edit", delete: "Hapus" },
+  labels = { view: "Lihat", edit: "Ubah", delete: "Hapus" },
 }) {
   const navigate = useNavigate();
 
@@ -33,21 +33,33 @@ export default function RowActions({
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-3">
       {!hideView && (
-        <Button variant="secondary" onClick={() => navigate(`${basePath}/view/${id}`)}>
-          {labels.view}
-        </Button>
+        <ActionIcon
+          title={labels.view}
+          onClick={() => navigate(`${basePath}/view/${id}`)}
+          className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+        >
+          <Eye />
+        </ActionIcon>
       )}
       {!hideEdit && (
-        <Button variant="success" onClick={() => navigate(`${basePath}/edit/${id}`)}>
-          {labels.edit}
-        </Button>
+        <ActionIcon
+          title={labels.edit}
+          onClick={() => navigate(`${basePath}/edit/${id}`)}
+          className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+        >
+          <Pencil />
+        </ActionIcon>
       )}
       {!hideDelete && (
-        <Button variant="danger" onClick={handleDeleteClick}>
-          {labels.delete}
-        </Button>
+        <ActionIcon
+          title={labels.delete}
+          onClick={handleDeleteClick}
+          className="text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
+        >
+          <Trash2 />
+        </ActionIcon>
       )}
     </div>
   );

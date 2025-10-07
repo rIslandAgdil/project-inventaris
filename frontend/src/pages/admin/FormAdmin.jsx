@@ -1,14 +1,14 @@
-// src/pages/admin/FormAdmin.jsx
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 const DUMMY_ADMIN = [
-  { id: 1, no: 1, username: "saya", email: "saya@gmail.com", password: "saya123" },
-  { id: 2, no: 2, username: "aku",  email: "aku@gmail.com",  password: "aku123"  },
-  { id: 3, no: 3, username: "kita", email: "kita@gmail.com", password: "kita123" },
+  { id: 1, username: "saya", email: "saya@gmail.com", password: "saya123" },
+  { id: 2, username: "aku",  email: "aku@gmail.com",  password: "aku123"  },
+  { id: 3, username: "kita", email: "kita@gmail.com", password: "kita123" },
 ];
 
 export default function FormAdmin() {
@@ -16,43 +16,36 @@ export default function FormAdmin() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const mode = useMemo(() => {
-    if (location.pathname.includes("/view/")) return "view";
-    if (id) return "edit";
-    return "create";
-  }, [id, location.pathname]);
+  const mode = location.pathname.includes("/view/")
+    ? "view"
+    : id
+    ? "edit"
+    : "create";
 
   const [form, setForm] = useState({ username: "", email: "", password: "" });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!id); // loading edit/view
 
   useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => {
-      if (id) {
-        const found = DUMMY_ADMIN.find((r) => String(r.id) === String(id));
-        if (!found) {
-          Swal.fire("Gagal", "Data tidak ditemukan (dummy)", "error");
-          navigate("/admin");
-          return;
-        }
-        setForm({
-          username: found.username ?? "",
-          email: found.email ?? "",
-          password: found.password ?? "",
-        });
-      }
-      setLoading(false);
-    }, 200);
-    return () => clearTimeout(t);
+    if (!id) return;
+    const found = DUMMY_ADMIN.find((r) => String(r.id) === String(id));
+    if (!found) {
+      Swal.fire("Gagal", "Data tidak ditemukan (dummy)", "error");
+      navigate("/admin");
+      return;
+    }
+    setForm({
+      username: found.username ?? "",
+      email: found.email ?? "",
+      password: found.password ?? "",
+    });
+    setLoading(false);
   }, [id, navigate]);
 
   const readOnly = mode === "view";
   const titleMap = { create: "Tambah", edit: "Edit", view: "Detail" };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleChange = (e) =>
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -63,9 +56,8 @@ export default function FormAdmin() {
       return;
     }
 
-    // UI-only
-    Swal.fire("Sukses", `Data berhasil disimpan (${mode}) — UI-only`, "success");
-    navigate("/admin");
+    Swal.fire("Sukses", `Data berhasil disimpan (${mode}) — UI-only`, "success")
+      .then(() => navigate("/admin"));
   };
 
   return (
@@ -77,7 +69,7 @@ export default function FormAdmin() {
       ]}
     >
       <div className="mb-4">
-        <h2 className="text-2xl font-semibold text-blue-700">
+        <h2 className="text-2xl font-semibold text-gray-700">
           {titleMap[mode]} Admin
         </h2>
         <p className="text-slate-600 text-sm mt-1">
@@ -91,38 +83,35 @@ export default function FormAdmin() {
         <form onSubmit={handleSubmit} className="grid gap-4 max-w-md">
           <div>
             <label className="block text-sm text-slate-700 mb-1">Username</label>
-            <input
+            <Input
               name="username"
               value={form.username}
               onChange={handleChange}
               readOnly={readOnly}
-              className="w-full border rounded-md px-3 py-2 text-sm"
               placeholder="Masukkan username admin"
             />
           </div>
 
           <div>
             <label className="block text-sm text-slate-700 mb-1">Email</label>
-            <input
+            <Input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
               readOnly={readOnly}
-              className="w-full border rounded-md px-3 py-2 text-sm"
               placeholder="Masukkan Email"
             />
           </div>
 
           <div>
             <label className="block text-sm text-slate-700 mb-1">Password</label>
-            <input
+            <Input
               type="password"
               name="password"
               value={form.password}
               onChange={handleChange}
               readOnly={readOnly}
-              className="w-full border rounded-md px-3 py-2 text-sm"
               placeholder="Masukkan Password"
             />
           </div>
