@@ -12,26 +12,27 @@ function Login() {
           className="w-35 aspect-square mx-auto mb-15"
         />
         <form
-          action=""
+          action="/login"
+          method="post"
           className="flex flex-col gap-6 justify-center items-center"
         >
-          <div className="flex items-center bg-gray-300/70 rounded-sm overflow-hidden w-[90%] pr-3 backdrop-blur-md">
+          <InputLogin>
             <User
               color="currentColor"
-              className="w-20 h-15 bg-gray-300/30 p-2"
+              className="w-20 h-15 bg-gray-300/30 p-3"
             />
             <Input type="text" placeholder="Username" />
-          </div>
-          <div className="flex items-center bg-gray-300/70 rounded-sm overflow-hidden w-[90%] pr-3 backdrop-blur-md">
+          </InputLogin>
+          <InputLogin>
             <Lock
               color="currentColor"
-              className="w-20 h-15 bg-gray-300/10 p-2"
+              className="w-20 h-15 bg-gray-300/10 p-3"
             />
             <Input type="password" placeholder="Password" />
-          </div>
+          </InputLogin>
           <button
             type="submit"
-            className="hover:cursor-pointer hover:bg-gray-900 backdrop-blur-md bg-gray-900/50 px-4 py-3 w-[40%] text-gray-200 tracking-widest text-xl mt-5"
+            className="hover:cursor-pointer hover:bg-gray-900 backdrop-blur-3xl bg-gray-900/30 px-4 py-3 w-[40%] text-gray-200 tracking-widest text-xl mt-5"
           >
             LOGIN
           </button>
@@ -42,3 +43,11 @@ function Login() {
 }
 
 export default Login;
+
+const InputLogin = ({ children }) => {
+  return (
+    <div className="flex items-center bg-gray-300/70 rounded-sm overflow-hidden w-[90%] pr-3 backdrop-blur-md">
+      {children}
+    </div>
+  );
+};
