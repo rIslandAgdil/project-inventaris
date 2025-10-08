@@ -5,7 +5,6 @@ import Table from "../../components/Table";
 import Button from "../../components/Button";
 import RowActions from "../../components/RowActions";
 
-
 const DUMMY_BARANG = [
   {
     id: 1,
@@ -26,7 +25,6 @@ export default function Databarang() {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
 
-
   useEffect(() => {
     setLoading(true);
     const t = setTimeout(() => {
@@ -36,10 +34,9 @@ export default function Databarang() {
       }));
       setBarang(withNo);
       setLoading(false);
-    }, 400); 
+    }, 400);
     return () => clearTimeout(t);
   }, []);
-
 
   const handleDelete = (row) => {
     Swal.fire({
@@ -53,18 +50,17 @@ export default function Databarang() {
       if (res.isConfirmed) {
         setbarang((prev) => {
           const filtered = prev.filter((p) => p.id !== row.id);
-      
+
           return filtered.map((it, idx) => ({ ...it, no: idx + 1 }));
         });
         Swal.fire("Berhasil", "barang telah dihapus (lokal)", "success");
       }
     });
-
+  };
   const removeById = (id) => {
     setBarang((prev) =>
       prev.filter((p) => p.id !== id).map((it, i) => ({ ...it, no: i + 1 }))
     );
-
   };
 
   const filtered = barang.filter(
