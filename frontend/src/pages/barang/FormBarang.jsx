@@ -196,6 +196,7 @@ export default function FormBarang() {
                 <Button variant="secondary" type="button" onClick={() => navigate("/barang")}>
                   Batal
                 </Button>
+                <Button variant="primary" type="button" onClick={() => navigate("/barang")} >Edit</Button>
               </div>
             </form>
           )}
