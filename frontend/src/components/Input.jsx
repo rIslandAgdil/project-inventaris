@@ -1,4 +1,5 @@
 function Input({
+  type,
   name,
   value,
   onChange,
@@ -9,7 +10,7 @@ function Input({
 }) {
   return (
     <input
-      type="text"
+      type={type}
       name={name}
       value={value}
       onChange={onChange}
