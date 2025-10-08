@@ -20,7 +20,7 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
       confirmButtonColor: "#e11d48",
     });
     if (!isConfirmed) return;
-    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setOpen(false);
     navigate("/Login");
   };
@@ -45,11 +45,16 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
                 <li key={i} className="flex items-center gap-2 truncate">
                   {i > 0 && <span className="text-slate-300">/</span>}
                   {item.to ? (
-                    <Link to={item.to} className="hover:text-slate-700 truncate">
+                    <Link
+                      to={item.to}
+                      className="hover:text-slate-700 truncate"
+                    >
                       {item.label}
                     </Link>
                   ) : (
-                    <span className="text-slate-900 font-medium truncate">{item.label}</span>
+                    <span className="text-slate-900 font-medium truncate">
+                      {item.label}
+                    </span>
                   )}
                 </li>
               ))}
@@ -58,23 +63,21 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 relative">
-
           <div className="relative">
             <button
               className="flex shadow bg-slate-100 items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-gray-300"
               onClick={() => setOpen(!open)}
             >
-                <img
-                  src="/profile.png"   // taruh gambar di public/profile.jpg
-                  alt="Avatar"
-                  className="w-6 h-6 rounded-full object-cover"
-                />
+              <img
+                src="/profile.png" // taruh gambar di public/profile.jpg
+                alt="Avatar"
+                className="w-6 h-6 rounded-full object-cover"
+              />
               <span className="px-2 hidden sm:block text-sm font-medium">
                 Nofryanti
               </span>
               <ChevronDown size={16} />
             </button>
-
 
             {open && (
               <div className="absolute right-0 mt-2 w-30 bg-rose-600 rounded-sm shadow justify hover:bg-red-700">
@@ -88,8 +91,6 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
                 </ul>
               </div>
             )}
-
-
           </div>
         </div>
       </div>

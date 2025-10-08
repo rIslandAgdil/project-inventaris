@@ -1,4 +1,6 @@
+import { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
 import Dashboard from "./pages/Dashboard";
 import ListBarang from "./pages/barang/ListBarang";
 import FormBarang from "./pages/barang/FormBarang";
@@ -9,10 +11,27 @@ import FormAdmin from "./pages/admin/FormAdmin";
 import Login from "./pages/Login";
 
 export default function App() {
+  const { user } = useContext(AuthContext);
+
+  const PrivateRoute = ({ children }) => {
+    if (!user) {
+      return <Navigate to="/login" />;
+    } else {
+      return children;
+    }
+  };
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Dashboard />} />
+      <Route
+        path="/"
+        element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        }
+      />
 
       <Route path="/barang" element={<ListBarang />} />
       <Route path="/barang/tambah" element={<FormBarang />} />

@@ -3,12 +3,14 @@ import { Lock } from "lucide-react";
 import { User } from "lucide-react";
 import { baseUrl } from "../api/api";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
+  const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -24,10 +26,17 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`${baseUrl}/login`, formData);
+      const res = await axios.post(`${baseUrl}/login`, formData);
+      const { token } = res.data;
+      const dataLogin = {
+        token,
+        email: res.email,
+        username: res.username,
+      };
 
+      localStorage.setItem("user", JSON.stringify(dataLogin));
+      setUser(dataLogin);
       navigate("/");
-      console.log("Response:", response.status);
     } catch (error) {
       if (error.response) {
         // Server memberikan response error, misal 401, 500
