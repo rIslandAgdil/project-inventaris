@@ -16,14 +16,10 @@ export default function FormAdmin() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const mode = location.pathname.includes("/view/")
-    ? "view"
-    : id
-    ? "edit"
-    : "create";
+  const mode = location.pathname.includes("/view/") ? "view" : id ? "edit" : "create";
 
   const [form, setForm] = useState({ username: "", email: "", password: "" });
-  const [loading, setLoading] = useState(!!id); // loading edit/view
+  const [loading, setLoading] = useState(!!id);
 
   useEffect(() => {
     if (!id) return;
@@ -55,7 +51,6 @@ export default function FormAdmin() {
       Swal.fire("Validasi", "Username, Email, dan Password wajib diisi", "warning");
       return;
     }
-
     Swal.fire("Sukses", `Data berhasil disimpan (${mode}) — UI-only`, "success")
       .then(() => navigate("/admin"));
   };
@@ -68,71 +63,78 @@ export default function FormAdmin() {
         { label: titleMap[mode] },
       ]}
     >
-      <div className="mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">
-          {titleMap[mode]} Admin
-        </h2>
-        <p className="text-slate-600 text-sm mt-1">
-          Form {mode === "create" ? "penambahan" : mode === "edit" ? "pengubahan" : "detail"} admin (UI-only).
-        </p>
+      <div className="max-w-xl mx-auto">
+        <div className="bg-white border rounded-md shadow-sm overflow-hidden">
+
+          <div className="px-6 py-4 border-b">
+            <h2 className="text-xl font-semibold text-gray-800">
+              {titleMap[mode]} Admin
+            </h2>
+            <p className="text-slate-600 text-sm mt-1">
+              Form {mode === "create" ? "penambahan" : mode === "edit" ? "pengubahan" : "detail"} admin.
+            </p>
+          </div>
+
+  
+          {loading ? (
+            <div className="px-6 py-6">Loading…</div>
+          ) : (
+            <form onSubmit={handleSubmit} className="px-6 py-6 grid gap-4">
+              <div>
+                <label className="block text-sm text-slate-700 mb-1">Username</label>
+                <Input
+                  name="username"
+                  value={form.username}
+                  onChange={handleChange}
+                  readOnly={readOnly}
+                  placeholder="Masukkan username admin"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-slate-700 mb-1">Email</label>
+                <Input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  readOnly={readOnly}
+                  placeholder="Masukkan Email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-slate-700 mb-1">Password</label>
+                <Input
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  readOnly={readOnly}
+                  placeholder="Masukkan Password"
+                />
+              </div>
+
+     
+              <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
+                <Button variant="secondary" type="button" onClick={() => navigate("/admin")}>
+                  Batal
+                </Button>
+
+                {mode === "view" ? (
+                  <Button type="button" variant="primary" onClick={() => navigate(`/admin/edit/${id}`)}>
+                    Edit
+                  </Button>
+                ) : (
+                  <Button type="submit" variant="primary">
+                    Simpan
+                  </Button>
+                )}
+              </div>
+            </form>
+          )}
+        </div>
       </div>
-
-      {loading ? (
-        <p>Loading…</p>
-      ) : (
-        <form onSubmit={handleSubmit} className="grid gap-4 max-w-md">
-          <div>
-            <label className="block text-sm text-slate-700 mb-1">Username</label>
-            <Input
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              readOnly={readOnly}
-              placeholder="Masukkan username admin"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-slate-700 mb-1">Email</label>
-            <Input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              readOnly={readOnly}
-              placeholder="Masukkan Email"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-slate-700 mb-1">Password</label>
-            <Input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              readOnly={readOnly}
-              placeholder="Masukkan Password"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 pt-2">
-            <Button variant="secondary" type="button" onClick={() => navigate("/admin")}>
-              Batal
-            </Button>
-
-            {mode === "view" ? (
-              <Button variant="success" type="button" onClick={() => navigate(`/admin/edit/${id}`)}>
-                Edit
-              </Button>
-            ) : (
-              <Button variant="primary" type="submit">
-                Simpan
-              </Button>
-            )}
-          </div>
-        </form>
-      )}
     </PageShell>
   );
 }

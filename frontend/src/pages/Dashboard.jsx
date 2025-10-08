@@ -17,7 +17,7 @@ export default function Dashboard() {
         { label: "Dashboard" },
       ]}
     >
-      {/* Section: Header */}
+
       <div className="mb-6">
         <h2 className="text-xl font-semibold">
           Dashboard <span className="text-slate-500 font-normal">Overview</span>

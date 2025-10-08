@@ -6,7 +6,7 @@ export default function ActionIcon({
   className = "",
   children,
 }) {
-  // icon-only, transparan, area klik sedikit lega
+  // icon-only, transparan
   const base =
     "inline-flex items-center justify-center bg-transparent p-1.5 h-auto w-auto " +
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ring-offset-white " +

@@ -1,4 +1,3 @@
-// src/pages/barang/Databarang.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageShell from "../../components/PageShell";
@@ -8,7 +7,7 @@ import Button from "../../components/Button";
 import Swal from "sweetalert2";
 import RowActions from "../../components/RowActions";
 
-// contoh untuk Barang
+
 const DUMMY_BARANG = [
   {
     id: 1,
@@ -29,7 +28,7 @@ export default function Databarang() {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
 
-  // Simulasi "fetch" lokal agar ada loading state
+
   useEffect(() => {
     setLoading(true);
     const t = setTimeout(() => {
@@ -39,7 +38,7 @@ export default function Databarang() {
       }));
       setbarang(withNo);
       setLoading(false);
-    }, 400); // sekadar animasi loading
+    }, 400); 
     return () => clearTimeout(t);
   }, []);
 
@@ -55,7 +54,7 @@ export default function Databarang() {
       if (res.isConfirmed) {
         setbarang((prev) => {
           const filtered = prev.filter((p) => p.id !== row.id);
-          // reset nomor urut
+      
           return filtered.map((it, idx) => ({ ...it, no: idx + 1 }));
         });
         Swal.fire("Berhasil", "barang telah dihapus (lokal)", "success");
