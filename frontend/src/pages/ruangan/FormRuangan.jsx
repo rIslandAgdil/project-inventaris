@@ -96,20 +96,6 @@ export default function FormRuangan() {
                 <Button variant="secondary" type="button" onClick={() => navigate("/ruangan")}>
                   Batal
                 </Button>
-
-                {mode === "view" ? (
-                  <Button
-                    variant="success"
-                    type="button"
-                    onClick={() => navigate(`/ruangan/edit/${id}`)}
-                  >
-                    Edit
-                  </Button>
-                ) : (
-                  <Button variant="primary" type="submit">
-                    Simpan
-                  </Button>
-                )}
               </div>
             </form>
           )}

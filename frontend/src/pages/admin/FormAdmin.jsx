@@ -121,15 +121,15 @@ export default function FormAdmin() {
                   Batal
                 </Button>
 
-                {mode === "view" ? (
+                {/* {mode === "view" ? (
                   <Button type="button" variant="primary" onClick={() => navigate(`/admin/edit/${id}`)}>
-                    Edit
+                    Ed
                   </Button>
                 ) : (
                   <Button type="submit" variant="primary">
                     Simpan
                   </Button>
-                )}
+                )} */}
               </div>
             </form>
           )}

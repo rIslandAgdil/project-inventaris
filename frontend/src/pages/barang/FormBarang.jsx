@@ -196,16 +196,6 @@ export default function FormBarang() {
                 <Button variant="secondary" type="button" onClick={() => navigate("/barang")}>
                   Batal
                 </Button>
-
-                {mode === "view" ? (
-                  <Button variant="success" type="button" onClick={() => navigate(`/barang/edit/${id}`)}>
-                    Edit
-                  </Button>
-                ) : (
-                  <Button variant="primary" type="submit">
-                    Simpan
-                  </Button>
-                )}
               </div>
             </form>
           )}
