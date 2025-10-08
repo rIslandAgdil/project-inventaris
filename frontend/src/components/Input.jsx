@@ -1,4 +1,12 @@
-function Input({ name, value, onChange, placeholder, required, readOnly }) {
+function Input({
+  name,
+  value,
+  onChange,
+  placeholder,
+  required,
+  readOnly,
+  className,
+}) {
   return (
     <input
       type="text"
@@ -8,7 +16,9 @@ function Input({ name, value, onChange, placeholder, required, readOnly }) {
       placeholder={placeholder}
       required={required}
       readOnly={readOnly}
-      className={`p-2 border rounded w-full ${readOnly ? 'bg-gray-100 text-gray-500' : ''}`}
+      className={`p-2 border rounded w-full ${className} ${
+        readOnly ? "bg-gray-100 text-gray-500" : ""
+      }`}
     />
   );
 }

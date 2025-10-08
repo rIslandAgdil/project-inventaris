@@ -21,14 +21,22 @@ function Login() {
               color="currentColor"
               className="w-20 h-15 bg-gray-300/30 p-3"
             />
-            <Input type="text" placeholder="Username" />
+            <Input
+              type="text"
+              placeholder="Username"
+              className="outline-0 border-0"
+            />
           </InputLogin>
           <InputLogin>
             <Lock
               color="currentColor"
               className="w-20 h-15 bg-gray-300/10 p-3"
             />
-            <Input type="password" placeholder="Password" />
+            <Input
+              type="password"
+              placeholder="Password"
+              className="outline-0 border-0"
+            />
           </InputLogin>
           <button
             type="submit"
