@@ -1,4 +1,3 @@
-// src/components/Sidebar.jsx (ringkas, poin penting saja)
 import { LayoutGrid, Boxes, Building2, Users, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -25,7 +24,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
       {/* Desktop: fixed full-height */}
       <aside className={`${panel} hidden lg:flex fixed inset-y-0 left-0 z-40`}>
         <div className="px-4 py-4">
-          <h1 className="font-semibold text-lg text-slate-800">Job Sheet</h1>
+          <h1 className="font-bold text-lg text-slate-800">Inventory Project</h1>
         </div>
         <nav className="px-3 space-y-1 pb-4">
           <NavItem to="/" icon={LayoutGrid} label="Dashboard" />
@@ -35,7 +34,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         </nav>
       </aside>
 
-      {/* Mobile: backdrop + slide panel */}
+     
       <div
         onClick={onClose}
         className={`fixed inset-0 bg-black/40 z-40 transition-opacity lg:hidden ${
@@ -48,7 +47,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         }`}
       >
         <div className="px-4 py-4 flex items-center justify-between">
-          <h1 className="font-semibold text-lg text-slate-800">Job Sheet</h1>
+          <h1 className="font-semibold text-lg text-slate-800">Inventaris</h1>
           <button onClick={onClose} className="p-2 rounded-md hover:bg-slate-100"> <X size={18} /> </button>
         </div>
         <nav className="px-3 space-y-1 pb-4">

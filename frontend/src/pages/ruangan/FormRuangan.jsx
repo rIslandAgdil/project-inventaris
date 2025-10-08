@@ -22,7 +22,7 @@ export default function FormRuangan() {
     : "create";
 
   const [form, setForm] = useState({ ruangan: "" });
-  const [loading, setLoading] = useState(!!id); // loading edit/view
+  const [loading, setLoading] = useState(!!id);
 
   useEffect(() => {
     if (!id) return;
@@ -62,48 +62,59 @@ export default function FormRuangan() {
         { label: titleMap[mode] },
       ]}
     >
-      <div className="mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">
-          {titleMap[mode]} Ruangan
-        </h2>
-        <p className="text-slate-600 text-sm mt-1">
-          Form {mode === "create" ? "penambahan" : mode === "edit" ? "pengubahan" : "detail"} ruangan.
-        </p>
+      <div className="max-w-xl mx-auto">
+        <div className="bg-white border rounded-md shadow-sm overflow-hidden">
+
+          <div className="px-6 py-4 border-b">
+            <h2 className="text-xl font-semibold text-gray-800">
+              {titleMap[mode]} Ruangan
+            </h2>
+            <p className="text-slate-600 text-sm mt-1">
+              Form {mode === "create" ? "penambahan" : mode === "edit" ? "pengubahan" : "detail"} ruangan.
+            </p>
+          </div>
+
+       
+          {loading ? (
+            <div className="px-6 py-6">Loading…</div>
+          ) : (
+            <form onSubmit={handleSubmit} className="px-6 py-6 grid gap-4">
+              <div>
+                <label className="block text-sm text-slate-700 mb-1">Nama Ruangan</label>
+                <input
+                  name="ruangan"
+                  value={form.ruangan}
+                  onChange={handleChange}
+                  readOnly={readOnly}
+                  className="w-full border rounded-md px-3 py-2 text-sm"
+                  placeholder="Masukkan nama ruangan"
+                />
+              </div>
+
+             
+              <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
+                <Button variant="secondary" type="button" onClick={() => navigate("/ruangan")}>
+                  Batal
+                </Button>
+
+                {mode === "view" ? (
+                  <Button
+                    variant="success"
+                    type="button"
+                    onClick={() => navigate(`/ruangan/edit/${id}`)}
+                  >
+                    Edit
+                  </Button>
+                ) : (
+                  <Button variant="primary" type="submit">
+                    Simpan
+                  </Button>
+                )}
+              </div>
+            </form>
+          )}
+        </div>
       </div>
-
-      {loading ? (
-        <p>Loading…</p>
-      ) : (
-        <form onSubmit={handleSubmit} className="grid gap-4 max-w-md">
-          <div>
-            <label className="block text-sm text-slate-700 mb-1">Nama Ruangan</label>
-            <input
-              name="ruangan"
-              value={form.ruangan}
-              onChange={handleChange}
-              readOnly={readOnly}
-              className="w-full border rounded-md px-3 py-2 text-sm"
-              placeholder="Masukkan nama ruangan"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 pt-2">
-            <Button variant="secondary" type="button" onClick={() => navigate("/ruangan")}>
-              Batal
-            </Button>
-
-            {mode === "view" ? (
-              <Button variant="success" type="button" onClick={() => navigate(`/ruangan/edit/${id}`)}>
-                Edit
-              </Button>
-            ) : (
-              <Button variant="primary" type="submit">
-                Simpan
-              </Button>
-            )}
-          </div>
-        </form>
-      )}
     </PageShell>
   );
 }

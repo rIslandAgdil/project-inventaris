@@ -1,4 +1,3 @@
-// pages/admin/DataAdmin.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageShell from "../../components/PageShell";
@@ -27,14 +26,13 @@ export default function DataAdmin() {
     return () => clearTimeout(t);
   }, []);
 
-  // Hapus item & re-number kolom "no"
   const removeById = (id) => {
     setRows((prev) =>
       prev.filter((p) => p.id !== id).map((it, i) => ({ ...it, no: i + 1 }))
     );
   };
 
-  // Pencarian berdasarkan field yang ada
+
   const filtered = rows.filter((p) => {
     const s = q.toLowerCase();
     return (
@@ -49,7 +47,7 @@ export default function DataAdmin() {
     { header: "No.", accessor: "no" },
     { header: "Username", accessor: "username" },
     { header: "Email", accessor: "email" },
-    { header: "Password", accessor: "password" }, // pertimbangkan untuk tidak menampilkan password di produksi
+    { header: "Password", accessor: "password" }, 
     {
       header: "Aksi",
       accessor: "actions",
@@ -57,8 +55,8 @@ export default function DataAdmin() {
         <RowActions
           basePath="/admin"
           id={row.id}
-          onDelete={() => removeById(row.id)}      // konfirmasi sudah ditangani RowActions
-          getDeleteName={() => row.username}       // nama yang tampil di dialog
+          onDelete={() => removeById(row.id)}     
+          getDeleteName={() => row.username}       
           labels={{ view: "Detail", edit: "Ubah", delete: "Hapus" }}
         />
       ),

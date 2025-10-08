@@ -46,7 +46,7 @@ export default function DataRuangan() {
     });
   };
 
-  // Filter sesuai field yang ada
+
   const filtered = rows.filter((p) => {
     const s = q.toLowerCase();
     return (

@@ -1,11 +1,12 @@
 function Table({ columns, data = [], emptyText = "Tidak ada data" }) {
+  
   //hidden tidak tampil dimobile
   const isHiddenOnMobile = (col) =>
     (col.className || "").split(/\s+/).includes("hidden");
 
   return (
     <div className="rounded-lg border border-gray-200 shadow overflow-x-auto">
-      {/*Desktop / Tablet (>= md) – tabel*/}
+  
       <div className="hidden md:block rounded-lg">
         <table className="w-full text-sm text-left table-auto">
           <thead className="bg-gray-600 text-white">
@@ -13,7 +14,7 @@ function Table({ columns, data = [], emptyText = "Tidak ada data" }) {
               {columns.map((col, i) => (
                 <th
                   key={i}
-                  className={`px-2 py-2 font-semibold text-left ${
+                  className={`px-4 py-2 font-semibold text-left ${
                     col.header === "No." ? "w-[60px]" :
                     col.header === "Aksi" ? "w-[120px] text-center" : "w-auto"
                   }`}
@@ -58,14 +59,14 @@ function Table({ columns, data = [], emptyText = "Tidak ada data" }) {
         </table>
       </div>
 
-      {/* ====== Mobile (< md) – kartu ====== */}
+   
       <div className="md:hidden divide-y">
         {data.length === 0 ? (
           <div className="p-4 text-center text-gray-500">{emptyText}</div>
         ) : (
           data.map((row, idx) => (
             <div key={idx} className="p-4 bg-white">
-              {/* label & nilai kiri */}
+          
               <div className="grid grid-cols-1 gap-3">
                 {columns
                   .filter((c) => c.accessor !== "actions" && !isHiddenOnMobile(c))
@@ -77,7 +78,7 @@ function Table({ columns, data = [], emptyText = "Tidak ada data" }) {
                   ))}
               </div>
 
-              {/* aksi center */}
+        
               {columns.some((c) => c.accessor === "actions") && (
                 <div className="mt-3 flex items-center justify-center gap-2">
                   {columns.find((c) => c.accessor === "actions")?.render?.(row, idx)}

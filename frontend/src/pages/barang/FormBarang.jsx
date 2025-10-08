@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Swal from "sweetalert2";
 
 import PageShell from "../../components/PageShell";
@@ -19,11 +19,9 @@ export default function FormBarang() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const mode = location.pathname.includes("/view/")
-    ? "view"
-    : id
-    ? "edit"
-    : "create";
+  const mode = useMemo(() => (
+    location.pathname.includes("/view/") ? "view" : (id ? "edit" : "create")
+  ), [id, location.pathname]);
 
   const [form, setForm] = useState({
     name: "",
@@ -33,10 +31,10 @@ export default function FormBarang() {
     ruangan: "",
     user: "",
   });
-  const [loading, setLoading] = useState(!!id); // loading edit/view
+  const [loading, setLoading] = useState(!!id);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) return setLoading(false);
     const found = DUMMY_BARANG.find((b) => String(b.id) === String(id));
     if (!found) {
       Swal.fire("Gagal", "Data tidak ditemukan (dummy)", "error");
@@ -69,7 +67,6 @@ export default function FormBarang() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (readOnly) return;
-
     if (!form.name.trim() || !form.kode_inventaris.trim()) {
       Swal.fire("Validasi", "Nama & Kode Inventaris wajib diisi", "warning");
       return;
@@ -89,121 +86,131 @@ export default function FormBarang() {
         { label: titleMap[mode] },
       ]}
     >
-      <div className="mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">{titleMap[mode]} Barang</h2>
-        <p className="text-slate-600 text-sm mt-1">
-          Form {mode === "create" ? "penambahan" : mode === "edit" ? "pengubahan" : "detail"} barang (UI-only).
-        </p>
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white border rounded-md shadow-sm overflow-hidden">
+        
+          <div className="px-6 py-4 border-b">
+            <h2 className="text-xl font-semibold text-gray-800">
+              {titleMap[mode]} Barang
+            </h2>
+            <p className="text-slate-600 text-sm mt-1">
+              Form {mode === "create" ? "penambahan" : mode === "edit" ? "pengubahan" : "detail"} barang (UI-only).
+            </p>
+          </div>
+
+        
+          {loading ? (
+            <div className="px-6 py-6">Loading…</div>
+          ) : (
+            <form onSubmit={handleSubmit} className="px-6 py-6 grid gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-1">Nama Barang</label>
+                  <input
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    readOnly={readOnly}
+                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    placeholder="Masukkan nama barang"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-700 mb-1">Kode Inventaris</label>
+                  <input
+                    name="kode_inventaris"
+                    value={form.kode_inventaris}
+                    onChange={handleChange}
+                    readOnly={readOnly}
+                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    placeholder="Kode Inventaris Barang"
+                  />
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-1">Jumlah</label>
+                  <input
+                    name="jumlah"
+                    value={form.jumlah}
+                    onChange={handleChange}
+                    readOnly={readOnly}
+                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    placeholder="Jumlah barang"
+                    inputMode="numeric"
+                    type="tel"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-700 mb-1">Kondisi</label>
+                  <select
+                    name="kondisi"
+                    value={form.kondisi}
+                    onChange={handleChange}
+                    disabled={readOnly}
+                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+                  >
+                    <option value="Baik">Baik</option>
+                    <option value="Perlu Servis">Perlu Servis</option>
+                    <option value="Rusak">Rusak</option>
+                    <option value="Hilang">Hilang</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-700 mb-1">Ruangan</label>
+                  <select
+                    name="ruangan"
+                    value={form.ruangan}
+                    onChange={handleChange}
+                    disabled={readOnly}
+                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+                  >
+                    <option value=""></option>
+                    {ROOM_OPTIONS.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                    {extraRoomOption && <option value={extraRoomOption}>{extraRoomOption}</option>}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-1">User/Penanggung Jawab</label>
+                <input
+                    name="user"
+                    value={form.user}
+                    onChange={handleChange}
+                    readOnly={readOnly}
+                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    placeholder="User"
+                  />
+                </div>
+              </div>
+
+              {/* Card footer */}
+              <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
+                <Button variant="secondary" type="button" onClick={() => navigate("/barang")}>
+                  Batal
+                </Button>
+
+                {mode === "view" ? (
+                  <Button variant="success" type="button" onClick={() => navigate(`/barang/edit/${id}`)}>
+                    Edit
+                  </Button>
+                ) : (
+                  <Button variant="primary" type="submit">
+                    Simpan
+                  </Button>
+                )}
+              </div>
+            </form>
+          )}
+        </div>
       </div>
-
-      {loading ? (
-        <p>Loading…</p>
-      ) : (
-        <form onSubmit={handleSubmit} className="grid gap-4 max-w-2xl">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-slate-700 mb-1">Nama Barang</label>
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                readOnly={readOnly}
-                className="w-full border rounded-md px-3 py-2 text-sm"
-                placeholder="Masukkan nama barang"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-700 mb-1">Kode Inventaris</label>
-              <input
-                name="kode_inventaris"
-                value={form.kode_inventaris}
-                onChange={handleChange}
-                readOnly={readOnly}
-                className="w-full border rounded-md px-3 py-2 text-sm"
-                placeholder="Kode Inventaris Barang"
-              />
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm text-slate-700 mb-1">Jumlah</label>
-              <input
-                name="jumlah"
-                value={form.jumlah}
-                onChange={handleChange}
-                readOnly={readOnly}
-                className="w-full border rounded-md px-3 py-2 text-sm"
-                placeholder="Jumlah barang"
-                inputMode="numeric"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-slate-700 mb-1">Kondisi</label>
-              <select
-                name="kondisi"
-                value={form.kondisi}
-                onChange={handleChange}
-                disabled={readOnly}
-                className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-              >
-                <option value="Baik">Baik</option>
-                <option value="Perlu Servis">Perlu Servis</option>
-                <option value="Rusak">Rusak</option>
-                <option value="Hilang">Hilang</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm text-slate-700 mb-1">Ruangan</label>
-              <select
-                name="ruangan"
-                value={form.ruangan}
-                onChange={handleChange}
-                disabled={readOnly}
-                className="w-full border rounded-md px-3 py-2 text-sm bg-white"
-              >
-                <option value=""></option>
-                {ROOM_OPTIONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-                {extraRoomOption && <option value={extraRoomOption}>{extraRoomOption}</option>}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-slate-700 mb-1">User/Penanggung Jawab</label>
-              <input
-                name="user"
-                value={form.user}
-                onChange={handleChange}
-                readOnly={readOnly}
-                className="w-full border rounded-md px-3 py-2 text-sm"
-                placeholder="User"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 pt-2">
-            <Button variant="secondary" type="button" onClick={() => navigate("/barang")}>
-              Batal
-            </Button>
-
-            {mode === "view" ? (
-              <Button variant="success" type="button" onClick={() => navigate(`/barang/edit/${id}`)}>
-                Edit
-              </Button>
-            ) : (
-              <Button variant="primary" type="submit">
-                Simpan
-              </Button>
-            )}
-          </div>
-        </form>
-      )}
     </PageShell>
   );
 }

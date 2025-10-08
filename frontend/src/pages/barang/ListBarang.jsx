@@ -1,4 +1,3 @@
-// src/pages/barang/Databarang.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageShell from "../../components/PageShell";
@@ -6,7 +5,7 @@ import Table from "../../components/Table";
 import Button from "../../components/Button";
 import RowActions from "../../components/RowActions";
 
-// contoh untuk Barang
+
 const DUMMY_BARANG = [
   {
     id: 1,
@@ -27,7 +26,7 @@ export default function Databarang() {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
 
-  // Simulasi "fetch" lokal agar ada loading state
+
   useEffect(() => {
     setLoading(true);
     const t = setTimeout(() => {
@@ -37,14 +36,35 @@ export default function Databarang() {
       }));
       setBarang(withNo);
       setLoading(false);
-    }, 400); // sekadar animasi loading
+    }, 400); 
     return () => clearTimeout(t);
   }, []);
+
+
+  const handleDelete = (row) => {
+    Swal.fire({
+      title: "Yakin?",
+      text: `Hapus ${row.name}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus",
+      cancelButtonText: "Batal",
+    }).then((res) => {
+      if (res.isConfirmed) {
+        setbarang((prev) => {
+          const filtered = prev.filter((p) => p.id !== row.id);
+      
+          return filtered.map((it, idx) => ({ ...it, no: idx + 1 }));
+        });
+        Swal.fire("Berhasil", "barang telah dihapus (lokal)", "success");
+      }
+    });
 
   const removeById = (id) => {
     setBarang((prev) =>
       prev.filter((p) => p.id !== id).map((it, i) => ({ ...it, no: i + 1 }))
     );
+
   };
 
   const filtered = barang.filter(
