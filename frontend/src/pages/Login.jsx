@@ -66,6 +66,7 @@ function Login() {
               required={true}
               value={formData.email}
               onChange={handleChange}
+              className="outline-0 border-0"
             />
           </InputLogin>
           <InputLogin>
@@ -80,6 +81,7 @@ function Login() {
               required={true}
               value={formData.password}
               onChange={handleChange}
+              className="outline-0 border-0"
             />
           </InputLogin>
           {message && (
