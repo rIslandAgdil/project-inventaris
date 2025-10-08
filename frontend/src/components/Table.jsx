@@ -1,19 +1,22 @@
 function Table({ columns, data = [], emptyText = "Tidak ada data" }) {
-  // Kolom yang diberi "hidden" tidak akan ditampilkan di card mobile
+  //hidden tidak tampil dimobile
   const isHiddenOnMobile = (col) =>
     (col.className || "").split(/\s+/).includes("hidden");
 
   return (
     <div className="rounded-lg border border-gray-200 shadow overflow-x-auto">
-      {/* ====== Desktop / Tablet (>= md) – tabel ====== */}
+      {/*Desktop / Tablet (>= md) – tabel*/}
       <div className="hidden md:block rounded-lg">
-        <table className="w-full text-sm text-left">
+        <table className="w-full text-sm text-left table-auto">
           <thead className="bg-gray-600 text-white">
             <tr>
               {columns.map((col, i) => (
                 <th
                   key={i}
-                  className={`px-4 py-2 font-semibold text-left ${col.className || ""}`}
+                  className={`px-2 py-2 font-semibold text-left ${
+                    col.header === "No." ? "w-[60px]" :
+                    col.header === "Aksi" ? "w-[120px] text-center" : "w-auto"
+                  }`}
                 >
                   {col.header}
                 </th>
@@ -37,7 +40,7 @@ function Table({ columns, data = [], emptyText = "Tidak ada data" }) {
                       <td
                         key={cIdx}
                         className={`px-4 py-2 border-t border-gray-100 align-middle ${
-                          isActions ? "text-center" : "text-left"
+                          isActions ? "text-center w-[180px]" : "text-left"
                         } ${col.className || ""}`}
                       >
                         {col.render
