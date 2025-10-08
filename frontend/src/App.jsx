@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
-import ListBarang from "./pages/barang/ListBarang"; 
-import FormBarang from "./pages/barang/FormBarang"; 
+import ListBarang from "./pages/barang/ListBarang";
+import FormBarang from "./pages/barang/FormBarang";
 import FormRuangan from "./pages/ruangan/FormRuangan";
 import ListRuangan from "./pages/ruangan/ListRuangan";
 import ListAdmin from "./pages/admin/ListAdmin";
@@ -11,6 +11,7 @@ import Login from "./pages/Login"
 export default function App() {
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
       <Route path="/" element={<Dashboard />} />
       <Route path="/login" element={<Login />} />
 
