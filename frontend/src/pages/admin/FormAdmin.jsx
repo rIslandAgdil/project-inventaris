@@ -116,20 +116,17 @@ export default function FormAdmin() {
               </div>
 
      
-              <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
-                <Button variant="secondary" type="button" onClick={() => navigate("/admin")}>
-                  Batal
-                </Button>
+                <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
+                  <Button variant="secondary" type="button" onClick={() => navigate("/admin")}>
+                    {mode === "view" ? "Kembali" : "Batal"}
+                  </Button>
 
-                {/* {mode === "view" ? (
-                  <Button type="button" variant="primary" onClick={() => navigate(`/admin/edit/${id}`)}>
-                    Ed
-                  </Button>
-                ) : (
-                  <Button type="submit" variant="primary">
-                    Simpan
-                  </Button>
-                )} */}
+                  {mode !== "view" && (
+                    <Button type="submit" variant="primary">
+                      Simpan
+                    </Button>
+                  )}
+
               </div>
             </form>
           )}

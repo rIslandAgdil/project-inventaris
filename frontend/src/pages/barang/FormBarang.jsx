@@ -191,11 +191,20 @@ export default function FormBarang() {
                 </div>
               </div>
 
-              {/* Card footer */}
-              <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
-                <Button variant="secondary" type="button" onClick={() => navigate("/barang")}>
-                  Batal
-                </Button>
+       
+   
+                <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
+                  <Button variant="secondary" type="button" onClick={() => navigate("/barang")}>
+                    {mode === "view" ? "Kembali" : "Batal"}
+                  </Button>
+
+
+                  {mode !== "view" && (
+                    <Button type="submit" variant="primary">
+                      Simpan
+                    </Button>
+                  )}
+
               </div>
             </form>
           )}
