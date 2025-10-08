@@ -22,18 +22,21 @@ export default function RowActions({
       text: `Hapus ${name}?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Ya, hapus",
       cancelButtonText: "Batal",
+      confirmButtonText: "Ya, hapus",
+      reverseButtons: true,
+      focusCancel: true,
+      confirmButtonColor: "#e11d48",
     }).then((res) => {
       if (res.isConfirmed) {
         onDelete?.();
-        Swal.fire("Berhasil", "Data telah dihapus (lokal)", "success");
+        Swal.fire("Berhasil", "Data telah dihapus", "success");
       }
     });
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-4">
       {!hideView && (
         <ActionIcon
           title={labels.view}

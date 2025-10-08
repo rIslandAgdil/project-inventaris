@@ -6,13 +6,14 @@ import FormRuangan from "./pages/ruangan/FormRuangan";
 import ListRuangan from "./pages/ruangan/ListRuangan";
 import ListAdmin from "./pages/admin/ListAdmin";
 import FormAdmin from "./pages/admin/FormAdmin";
-import Login from "./pages/Login";
+import Login from "./pages/Login"
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<Dashboard />} />
+      <Route path="/login" element={<Login />} />
 
       <Route path="/barang" element={<ListBarang />} />
       <Route path="/barang/tambah" element={<FormBarang />} />
