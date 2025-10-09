@@ -75,7 +75,12 @@ const login = async (req, res) => {
     };
     const token = jwt.sign(payload, SECRET_KEY);
 
-    return res.json({ message: "Berhasil Login", token, data: payload });
+    return res.json({
+      message: "Berhasil Login",
+      token,
+      idUser: user.id,
+      username: user.username,
+    });
   } catch (error) {
     console.error(error); // log error-nya
     return res.status(500).json({ message: error.message });

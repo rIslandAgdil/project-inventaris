@@ -1,62 +1,71 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import Swal from "sweetalert2";
+import axios from "axios";
+import { baseUrl } from "../../api/api";
 
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
 
-const DUMMY_BARANG = [
-  { id: 1, name: "Printer",  kode_inventaris: "INV-0001", jumlah: 3, kondisi: "Baik",         ruangan: "Ruang B101", user: "Nofryanti" },
-  { id: 2, name: "Switch",   kode_inventaris: "INV-0002", jumlah: 5, kondisi: "Baik",         ruangan: "IT Lab",     user: "Admin" },
-  { id: 3, name: "Laptop",   kode_inventaris: "INV-0003", jumlah: 2, kondisi: "Perlu Servis", ruangan: "IT Lab",     user: "Andi" },
-  { id: 4, name: "Proyektor",kode_inventaris: "INV-0004", jumlah: 1, kondisi: "Baik",         ruangan: "Aula",       user: "Sari" },
-];
-
-const ROOM_OPTIONS = ["Aula", "Talent Corner", "Gudang TIK", "Gedung 1", "IT Lab", "Ruang B101"];
-
 export default function FormBarang() {
   const { id } = useParams();
+  const { username, idUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-
-  const mode = useMemo(() => (
-    location.pathname.includes("/view/") ? "view" : (id ? "edit" : "create")
-  ), [id, location.pathname]);
-
+  const [ruangan, setRuangan] = useState([]);
   const [form, setForm] = useState({
-    name: "",
+    nama_barang: "",
     kode_inventaris: "",
     jumlah: "",
     kondisi: "Baik",
-    ruangan: "",
-    user: "",
+    ruanganId: 1,
+    userId: idUser,
   });
+
+  const mode = useMemo(
+    () =>
+      location.pathname.includes("/view/") ? "view" : id ? "edit" : "create",
+    [id, location.pathname]
+  );
   const [loading, setLoading] = useState(!!id);
-
-  useEffect(() => {
-    if (!id) return setLoading(false);
-    const found = DUMMY_BARANG.find((b) => String(b.id) === String(id));
-    if (!found) {
-      Swal.fire("Gagal", "Data tidak ditemukan (dummy)", "error");
-      navigate("/barang");
-      return;
-    }
-    setForm({
-      name: found.name ?? "",
-      kode_inventaris: found.kode_inventaris ?? "",
-      jumlah: String(found.jumlah ?? ""),
-      kondisi: found.kondisi ?? "Baik",
-      ruangan: found.ruangan ?? "",
-      user: found.user ?? "",
-    });
-    setLoading(false);
-  }, [id, navigate]);
-
   const readOnly = mode === "view";
   const titleMap = { create: "Tambah", edit: "Edit", view: "Detail" };
 
+  useEffect(() => {
+    if (mode !== "create") {
+      fetchDataUser(id);
+    }
+    fetchDataRuangan();
+  }, []);
+
+  // AMBIL DATA USER
+  const fetchDataUser = async (id) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${baseUrl}/barang/${id}`);
+      setForm(res.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+    setLoading(false);
+  };
+
+  // AMBIL DATA RUANGAN
+  const fetchDataRuangan = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${baseUrl}/ruangan`);
+      setRuangan(res.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+    setLoading(false);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     if (name === "jumlah") {
       setForm((s) => ({ ...s, jumlah: value.replace(/[^\d]/g, "") }));
     } else {
@@ -64,19 +73,50 @@ export default function FormBarang() {
     }
   };
 
-  const handleSubmit = (e) => {
+  // KETIKA TOMBOL SIMPAN DI KLIK
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (readOnly) return;
-    if (!form.name.trim() || !form.kode_inventaris.trim()) {
-      Swal.fire("Validasi", "Nama & Kode Inventaris wajib diisi", "warning");
+
+    //CEK JIKA DATA BELUM LENGKAP
+    if (
+      !form.nama_barang.trim() ||
+      !form.kode_inventaris.trim() ||
+      !form.jumlah
+    ) {
+      Swal.fire("Validasi", "Data belum lengkap!", "warning");
       return;
     }
-    Swal.fire("Sukses", `Data berhasil disimpan (${mode}) — dummy data`, "success")
-      .then(() => navigate("/barang"));
-  };
 
-  const extraRoomOption =
-    form.ruangan && !ROOM_OPTIONS.includes(form.ruangan) ? form.ruangan : null;
+    // JIKA DATA LENGKAP
+    Swal.fire({
+      title: "Simpan Data?",
+      text: `Pastikan data yang anda input sudah benar!`,
+      icon: "question",
+      showCancelButton: true,
+      cancelButtonText: "Batal",
+      confirmButtonText: "Simpan",
+      reverseButtons: true,
+      focusCancel: true,
+      confirmButtonColor: "#e11d48",
+    }).then(async (res) => {
+      if (res.isConfirmed) {
+        try {
+          setLoading(true);
+
+          mode === "create"
+            ? await axios.post(`${baseUrl}/barang`, form)
+            : await axios.put(`${baseUrl}/barang/${id}`, form);
+
+          Swal.fire("Sukses", `Data berhasil disimpan`, "success").then(() =>
+            navigate("/barang")
+          );
+        } catch (error) {
+          console.log(error.message);
+        }
+        setLoading(false);
+      }
+    });
+  };
 
   return (
     <PageShell
@@ -88,27 +128,34 @@ export default function FormBarang() {
     >
       <div className="max-w-3xl mx-auto">
         <div className="bg-white border rounded-md shadow-sm overflow-hidden">
-        
           <div className="px-6 py-4 border-b">
             <h2 className="text-xl font-semibold text-gray-800">
               {titleMap[mode]} Barang
             </h2>
             <p className="text-slate-600 text-sm mt-1">
-              Form {mode === "create" ? "penambahan" : mode === "edit" ? "pengubahan" : "detail"} barang (UI-only).
+              Form{" "}
+              {mode === "create"
+                ? "penambahan"
+                : mode === "edit"
+                ? "pengubahan"
+                : "detail"}{" "}
+              barang (UI-only).
             </p>
           </div>
 
-        
           {loading ? (
             <div className="px-6 py-6">Loading…</div>
           ) : (
             <form onSubmit={handleSubmit} className="px-6 py-6 grid gap-4">
+              <input type="hidden" name="userId" value={form.userId} readOnly />
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Nama Barang</label>
+                  <label className="block text-sm text-slate-700 mb-1">
+                    Nama Barang
+                  </label>
                   <input
-                    name="name"
-                    value={form.name}
+                    name="nama_barang"
+                    value={form.nama_barang}
                     onChange={handleChange}
                     readOnly={readOnly}
                     className="w-full border rounded-md px-3 py-2 text-sm"
@@ -116,7 +163,9 @@ export default function FormBarang() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Kode Inventaris</label>
+                  <label className="block text-sm text-slate-700 mb-1">
+                    Kode Inventaris
+                  </label>
                   <input
                     name="kode_inventaris"
                     value={form.kode_inventaris}
@@ -130,7 +179,9 @@ export default function FormBarang() {
 
               <div className="grid sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Jumlah</label>
+                  <label className="block text-sm text-slate-700 mb-1">
+                    Jumlah
+                  </label>
                   <input
                     name="jumlah"
                     value={form.jumlah}
@@ -144,7 +195,9 @@ export default function FormBarang() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Kondisi</label>
+                  <label className="block text-sm text-slate-700 mb-1">
+                    Kondisi
+                  </label>
                   <select
                     name="kondisi"
                     value={form.kondisi}
@@ -153,58 +206,59 @@ export default function FormBarang() {
                     className="w-full border rounded-md px-3 py-2 text-sm bg-white"
                   >
                     <option value="Baik">Baik</option>
-                    <option value="Perlu Servis">Perlu Servis</option>
                     <option value="Rusak">Rusak</option>
-                    <option value="Hilang">Hilang</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Ruangan</label>
+                  <label className="block text-sm text-slate-700 mb-1">
+                    Ruangan
+                  </label>
                   <select
-                    name="ruangan"
-                    value={form.ruangan}
+                    name="ruanganId"
+                    value={form.ruanganId}
                     onChange={handleChange}
                     disabled={readOnly}
                     className="w-full border rounded-md px-3 py-2 text-sm bg-white"
                   >
-                    <option value=""></option>
-                    {ROOM_OPTIONS.map((r) => (
-                      <option key={r} value={r}>{r}</option>
+                    {ruangan.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.nama_ruangan}
+                      </option>
                     ))}
-                    {extraRoomOption && <option value={extraRoomOption}>{extraRoomOption}</option>}
                   </select>
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">User/Penanggung Jawab</label>
-                <input
-                    name="user"
-                    value={form.user}
-                    onChange={handleChange}
-                    readOnly={readOnly}
-                    className="w-full border rounded-md px-3 py-2 text-sm"
+                  <label className="block text-sm text-slate-700 mb-1">
+                    User/Penanggung Jawab
+                  </label>
+                  <input
+                    name="username"
+                    value={username}
+                    readOnly
+                    className="w-full border rounded-md px-3 py-2 text-sm bg-gray-200 outline-0"
                     placeholder="User"
                   />
                 </div>
               </div>
 
-       
-   
-                <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
-                  <Button variant="secondary" type="button" onClick={() => navigate("/barang")}>
-                    {mode === "view" ? "Kembali" : "Batal"}
+              <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
+                <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={() => navigate("/barang")}
+                >
+                  {mode === "view" ? "Kembali" : "Batal"}
+                </Button>
+
+                {mode !== "view" && (
+                  <Button type="submit" variant="primary">
+                    Simpan
                   </Button>
-
-
-                  {mode !== "view" && (
-                    <Button type="submit" variant="primary">
-                      Simpan
-                    </Button>
-                  )}
-
+                )}
               </div>
             </form>
           )}
