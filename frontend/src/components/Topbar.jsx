@@ -18,8 +18,12 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
       confirmButtonColor: "#16a34a",
     });
     if (!isConfirmed) return;
+
+    // HAPUS DATA LOGIN DI LOCALSTORAGE
+    localStorage.removeItem("username");
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("idUser");
+    
     setOpen(false);
     navigate("/login");
   };

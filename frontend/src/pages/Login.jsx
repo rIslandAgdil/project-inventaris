@@ -1,14 +1,15 @@
 import Input from "../components/Input";
-import { Lock, User } from "lucide-react";
-import { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { Lock } from "lucide-react";
+import { User } from "lucide-react";
+import { baseUrl } from "../api/api";
+import axios from "axios";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
-  const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,18 +22,12 @@ function Login() {
     setMessage("");
 
     try {
-      // Backend response: { message, token, data: { username, email, ... } }
-      const res = await api.post("/login", formData);
-      const { token, data } = res.data || {};
+      const res = await axios.post(`${baseUrl}/login`, formData);
+      const { token, username, idUser } = res.data;
 
-      if (!token || !data) {
-        throw new Error("Login response tidak valid");
-      }
-
-      // Simpan token & data user
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(data));
-      setUser(data);
+      localStorage.setItem("token", JSON.stringify(token));
+      localStorage.setItem("username", JSON.stringify(username));
+      localStorage.setItem("idUser", JSON.stringify(idUser));
 
       navigate("/");
     } catch (error) {

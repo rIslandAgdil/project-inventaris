@@ -64,6 +64,12 @@ export default function RowActions({
       reverseButtons: true,
       focusCancel: true,
       confirmButtonColor: "#e11d48",
+    }).then((res) => {
+      if (res.isConfirmed) {
+        onDelete?.();
+        Swal.fire("Berhasil", "Data telah dihapus", "success");
+        navigate(`${basePath}`);
+      }
     });
     if (!confirm.isConfirmed) return;
 
