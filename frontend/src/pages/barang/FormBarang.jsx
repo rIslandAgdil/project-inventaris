@@ -244,7 +244,6 @@ export default function FormBarang() {
                   />
                 </div>
               </div>
-
               <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
                 <Button
                   variant="secondary"
