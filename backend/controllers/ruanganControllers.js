@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 exports.createRuangan = async (req, res) => {
   try {
     const { nama_ruangan } = req.body;
-    console.log(nama_ruangan);
     const ruangan = await prisma.ruangan.create({
       data: { nama_ruangan },
     });
