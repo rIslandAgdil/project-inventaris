@@ -1,82 +1,68 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { baseUrl } from "../../api/api";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
 import Swal from "sweetalert2";
 import RowActions from "../../components/RowActions";
 
-// Data dummy
-const DUMMY_RUANGAN = [
-  { id: 1, no: 1, ruangan: "Ruang B101", barang: "Komputer, monitor" },
-  { id: 2, no: 2, ruangan: "Ruang B102", barang: "Kompor" },
-  { id: 3, no: 3, ruangan: "Ruang B101", barang: "Gorden" },
-];
-
 export default function DataRuangan() {
-  const [rows, setRows] = useState([]);
+  const [ruangan, setRuangan] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => {
-      setRows(DUMMY_RUANGAN.map((item, idx) => ({ ...item, no: idx + 1 })));
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(t);
-  }, []);
-
-  const handleDelete = (row) => {
-    Swal.fire({
-      title: "Yakin?",
-      text: `Hapus ${row.ruangan}?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Ya, hapus",
-      cancelButtonText: "Batal",
-    }).then((res) => {
-      if (res.isConfirmed) {
-        setRows((prev) =>
-          prev.filter((p) => p.id !== row.id).map((it, i) => ({ ...it, no: i + 1 }))
-        );
-        Swal.fire("Berhasil", "Ruangan dihapus (lokal)", "success");
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // pastikan endpoint sesuai backend-mu
+        const res = await axios.get(`${baseUrl}/ruangan`);
+        const data = res.data.map((item, idx) => ({ ...item, no: idx + 1 }));
+        setRuangan(data);
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Gagal", "Gagal memuat data barang", "error");
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    fetchData();
+  }, [location.key]);
+
+  const removeById = async (id) => {
+    try {
+      await axios.delete(`${baseUrl}/ruangan/${id}`);
+    } catch (error) {
+      return console.log("Gagal Menghapus Data");
+    }
   };
 
-
-  const filtered = rows.filter((p) => {
+  const filtered = ruangan.filter((p) => {
     const s = q.toLowerCase();
-    return (
-      String(p.no).includes(s) ||
-      p.ruangan.toLowerCase().includes(s) ||
-      p.barang.toLowerCase().includes(s)
-    );
+    return p.nama_ruangan.toLowerCase().includes(s);
   });
 
   const columns = [
     { header: "No.", accessor: "no", hideBelow: "md" },
-    { header: "Ruangan", accessor: "ruangan" },
-    { header: "Barang", accessor: "barang" },
+    { header: "Ruangan", accessor: "nama_ruangan" },
     {
-           header: "Aksi",
-           accessor: "actions",
-           render: (row) => (
-             <RowActions
-               basePath="/ruangan"
-               id={row.id}
-               onDelete={() => {
-                 setRows((prev) =>
-                   prev.filter((p) => p.id !== row.id).map((it, i) => ({ ...it, no: i + 1 }))
-                 );
-               }}
-               getDeleteName={() => row.username}
-             />
-           ),
-         },
-      ];
+      header: "Aksi",
+      accessor: "actions",
+      render: (row) => (
+        <RowActions
+          basePath="/ruangan"
+          id={row.id}
+          onDelete={() => removeById(row.id)}
+          getDeleteName={() => row.username}
+        />
+      ),
+    },
+  ];
 
   return (
     <PageShell breadcrumb={[{ label: "Home", to: "/" }, { label: "Ruangan" }]}>
@@ -90,7 +76,12 @@ export default function DataRuangan() {
             placeholder="Cari no/ruangan/barang"
             className="border rounded-md px-3 py-2 text-sm"
           />
-          <Button variant="secondary" onClick={() => navigate("/ruangan/tambah")}>+ Tambah Ruangan</Button>
+          <Button
+            variant="secondary"
+            onClick={() => navigate("/ruangan/tambah")}
+          >
+            + Tambah Ruangan
+          </Button>
         </div>
       </div>
 
