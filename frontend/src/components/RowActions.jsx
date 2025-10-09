@@ -12,12 +12,49 @@ export default function RowActions({
   hideEdit = false,
   hideDelete = false,
   labels = { view: "Lihat", edit: "Ubah", delete: "Hapus" },
+  requireDeletePassword = false,   // ⬅️ baru
 }) {
   const navigate = useNavigate();
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = async () => {
     const name = getDeleteName?.() ?? "data ini";
-    Swal.fire({
+
+    if (requireDeletePassword) {
+      // Mode khusus: minta password dulu (untuk Users)
+      const res = await Swal.fire({
+        title: "Konfirmasi Hapus",
+        html: `Hapus <b>${name}</b>?<br /><span class="text-sm text-slate-600">Masukkan password untuk melanjutkan.</span>`,
+        input: "password",
+        inputPlaceholder: "Password",
+        inputAttributes: { minlength: 4, autocomplete: "current-password" },
+        showCancelButton: true,
+        cancelButtonText: "Batal",
+        confirmButtonText: "Ya, Hapus",
+        confirmButtonColor: "#e11d48",
+        reverseButtons: true,
+        focusCancel: true,
+        preConfirm: (value) => {
+          if (!value || value.length < 4) {
+            Swal.showValidationMessage("Password minimal 4 karakter");
+            return false;
+          }
+          return value;
+        },
+      });
+      if (!res.isConfirmed) return;
+
+      try {
+        await onDelete?.(res.value); // kirim password ke pemanggil
+        await Swal.fire("Berhasil", "Data telah dihapus", "success");
+        if (basePath) navigate(`${basePath}`);
+      } catch (e) {
+        Swal.fire("Gagal", e?.response?.data?.error || e.message || "Gagal menghapus.", "error");
+      }
+      return;
+    }
+
+    // Mode default: konfirmasi biasa (untuk halaman lain)
+    const confirm = await Swal.fire({
       title: "Yakin?",
       text: `Hapus ${name}?`,
       icon: "warning",
@@ -27,12 +64,16 @@ export default function RowActions({
       reverseButtons: true,
       focusCancel: true,
       confirmButtonColor: "#e11d48",
-    }).then((res) => {
-      if (res.isConfirmed) {
-        onDelete?.();
-        Swal.fire("Berhasil", "Data telah dihapus", "success");
-      }
     });
+    if (!confirm.isConfirmed) return;
+
+    try {
+      await onDelete?.(); // tidak butuh password
+      await Swal.fire("Berhasil", "Data telah dihapus", "success");
+      if (basePath) navigate(`${basePath}`);
+    } catch (e) {
+      Swal.fire("Gagal", e?.response?.data?.error || e.message || "Gagal menghapus.", "error");
+    }
   };
 
   return (

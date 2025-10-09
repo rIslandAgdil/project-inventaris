@@ -70,6 +70,7 @@ const login = async (req, res) => {
 
     //jika cocok, buat token jwt
     const payload = {
+      id: user.id,
       username: user.username,
       email: user.email,
     };

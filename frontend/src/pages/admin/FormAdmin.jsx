@@ -1,58 +1,131 @@
+// src/pages/admin/FormAdmin.jsx
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
-import Input from "../../components/Input";
+import { api } from "../../api/api";
 
-const DUMMY_ADMIN = [
-  { id: 1, username: "saya", email: "saya@gmail.com", password: "saya123" },
-  { id: 2, username: "aku",  email: "aku@gmail.com",  password: "aku123"  },
-  { id: 3, username: "kita", email: "kita@gmail.com", password: "kita123" },
-];
+const USERS_ENDPOINT = "/api/users";
 
-export default function FormAdmin() {
+function pickOne(payload) {
+  const p = payload?.data ?? payload;
+  if (Array.isArray(p)) return p[0] ?? {};
+  if (Array.isArray(p?.data)) return p.data[0] ?? {};
+  if (p && typeof p === "object") return p;
+  return {};
+}
+
+export default function FormAdmin({ mode: modeProp }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const mode = location.pathname.includes("/view/") ? "view" : id ? "edit" : "create";
+  const mode = useMemo(() => {
+    if (modeProp) return modeProp;
+    if (location.pathname.includes("/view/")) return "view";
+    if (id) return "edit";
+    return "create";
+  }, [modeProp, id, location.pathname]);
 
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  // create: password; edit: confirmPassword (wajib), newPassword (opsional)
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",          // create only
+    confirmPassword: "",   // edit required
+    newPassword: "",       // edit optional
+  });
   const [loading, setLoading] = useState(!!id);
 
   useEffect(() => {
+    if (!(mode === "edit" || mode === "view")) return;
     if (!id) return;
-    const found = DUMMY_ADMIN.find((r) => String(r.id) === String(id));
-    if (!found) {
-      Swal.fire("Gagal", "Data tidak ditemukan (dummy)", "error");
-      navigate("/admin");
-      return;
-    }
-    setForm({
-      username: found.username ?? "",
-      email: found.email ?? "",
-      password: found.password ?? "",
-    });
-    setLoading(false);
-  }, [id, navigate]);
+    let ignore = false;
+
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(`${USERS_ENDPOINT}/${id}`);
+        const u = pickOne(res?.data);
+        if (!ignore) {
+          setForm((s) => ({
+            ...s,
+            username: u?.username ?? "",
+            email: u?.email ?? "",
+            password: "",
+            confirmPassword: "",
+            newPassword: "",
+          }));
+        }
+      } catch (e) {
+        Swal.fire("Gagal", e?.response?.data?.error || e.message, "error");
+        navigate("/admin");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    })();
+
+    return () => { ignore = true; };
+  }, [id, mode, navigate]);
 
   const readOnly = mode === "view";
   const titleMap = { create: "Tambah", edit: "Edit", view: "Detail" };
 
-  const handleChange = (e) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((s) => ({ ...s, [name]: value }));
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (readOnly) return;
 
-    if (!form.username.trim() || !form.email.trim() || !form.password.trim()) {
-      Swal.fire("Validasi", "Username, Email, dan Password wajib diisi", "warning");
-      return;
+    if (!form.username.trim()) return Swal.fire("Validasi", "Username wajib diisi", "warning");
+    if (!form.email.trim()) return Swal.fire("Validasi", "Email wajib diisi", "warning");
+
+    try {
+      setLoading(true);
+
+      if (mode === "edit" && id) {
+        // wajib konfirmasi password saat menyimpan perubahan
+        if (!form.confirmPassword || form.confirmPassword.trim().length < 4) {
+          setLoading(false);
+          return Swal.fire("Validasi", "Password konfirmasi minimal 4 karakter.", "warning");
+        }
+        const payload = {
+          username: form.username,
+          email: form.email,
+          confirmPassword: form.confirmPassword.trim(),
+        };
+        // ganti password bila diisi
+        if (form.newPassword && form.newPassword.trim()) {
+          if (form.newPassword.trim().length < 4) {
+            setLoading(false);
+            return Swal.fire("Validasi", "Password baru minimal 4 karakter.", "warning");
+          }
+          payload.password = form.newPassword.trim();
+        }
+        await api.put(`${USERS_ENDPOINT}/${id}`, payload);
+      } else if (mode === "create") {
+        if (!form.password || form.password.trim().length < 4) {
+          setLoading(false);
+          return Swal.fire("Lengkapi", "Password minimal 4 karakter.", "warning");
+        }
+        await api.post(USERS_ENDPOINT, {
+          username: form.username,
+          email: form.email,
+          password: form.password.trim(),
+        });
+      }
+
+      await Swal.fire("Sukses", "Data admin berhasil disimpan.", "success");
+      navigate("/admin");
+    } catch (e) {
+      Swal.fire("Gagal", e?.response?.data?.error || e.message, "error");
+    } finally {
+      setLoading(false);
     }
-    Swal.fire("Sukses", `Data berhasil disimpan (${mode}) — UI-only`, "success")
-      .then(() => navigate("/admin"));
   };
 
   return (
@@ -65,7 +138,6 @@ export default function FormAdmin() {
     >
       <div className="max-w-xl mx-auto">
         <div className="bg-white border rounded-md shadow-sm overflow-hidden">
-
           <div className="px-6 py-4 border-b">
             <h2 className="text-xl font-semibold text-gray-800">
               {titleMap[mode]} Admin
@@ -75,58 +147,100 @@ export default function FormAdmin() {
             </p>
           </div>
 
-  
           {loading ? (
             <div className="px-6 py-6">Loading…</div>
           ) : (
             <form onSubmit={handleSubmit} className="px-6 py-6 grid gap-4">
+              {/* Username */}
               <div>
                 <label className="block text-sm text-slate-700 mb-1">Username</label>
-                <Input
+                <input
                   name="username"
                   value={form.username}
                   onChange={handleChange}
                   readOnly={readOnly}
-                  placeholder="Masukkan username admin"
+                  className="w-full border rounded-md px-3 py-2 text-sm"
+                  placeholder="Masukkan username"
+                  required
                 />
               </div>
 
+              {/* Email */}
               <div>
                 <label className="block text-sm text-slate-700 mb-1">Email</label>
-                <Input
-                  type="email"
+                <input
                   name="email"
+                  type="email"
                   value={form.email}
                   onChange={handleChange}
                   readOnly={readOnly}
-                  placeholder="Masukkan Email"
+                  className="w-full border rounded-md px-3 py-2 text-sm"
+                  placeholder="nama@email.com"
+                  required
                 />
               </div>
 
-              <div>
-                <label className="block text-sm text-slate-700 mb-1">Password</label>
-                <Input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  readOnly={readOnly}
-                  placeholder="Masukkan Password"
-                />
-              </div>
+              {/* Create: password wajib */}
+              {mode === "create" && (
+                <div>
+                  <label className="block text-sm text-slate-700 mb-1">Password</label>
+                  <input
+                    name="password"
+                    type="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    readOnly={readOnly}
+                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    placeholder="Minimal 4 karakter"
+                    minLength={4}
+                    required
+                  />
+                </div>
+              )}
 
-     
-                <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
-                  <Button variant="secondary" type="button" onClick={() => navigate("/admin")}>
-                    {mode === "view" ? "Kembali" : "Batal"}
+              {/* Edit: password konfirmasi (wajib) + password baru (opsional) */}
+              {mode === "edit" && (
+                <>
+                  <div>
+                    <label className="block text-sm text-slate-700 mb-1">Password Konfirmasi</label>
+                    <input
+                      name="confirmPassword"
+                      type="password"
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      readOnly={readOnly}
+                      className="w-full border rounded-md px-3 py-2 text-sm"
+                      placeholder="Masukkan password akun untuk menyimpan perubahan"
+                      minLength={4}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-slate-700 mb-1">Password Baru (opsional)</label>
+                    <input
+                      name="newPassword"
+                      type="password"
+                      value={form.newPassword}
+                      onChange={handleChange}
+                      readOnly={readOnly}
+                      className="w-full border rounded-md px-3 py-2 text-sm"
+                      placeholder="Isi jika ingin ganti, minimal 4 karakter"
+                      minLength={4}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="flex items-center gap-2 pt-4 mt-2 border-t justify-end">
+                <Button variant="secondary" type="button" onClick={() => navigate("/admin")}>
+                  {readOnly ? "Kembali" : "Batal"}
+                </Button>
+                {!readOnly && (
+                  <Button type="submit" variant="primary" disabled={loading}>
+                    {loading ? "Menyimpan..." : "Simpan"}
                   </Button>
-
-                  {mode !== "view" && (
-                    <Button type="submit" variant="primary">
-                      Simpan
-                    </Button>
-                  )}
-
+                )}
               </div>
             </form>
           )}

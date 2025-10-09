@@ -1,11 +1,9 @@
 import Input from "../components/Input";
-import { Lock } from "lucide-react";
-import { User } from "lucide-react";
-import { baseUrl } from "../api/api";
-import axios from "axios";
+import { Lock, User } from "lucide-react";
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { api } from "../api/api";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -15,37 +13,32 @@ function Login() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
 
     try {
-      const res = await axios.post(`${baseUrl}/login`, formData);
-      const { token } = res.data;
-      const dataLogin = {
-        token,
-        email: res.email,
-        username: res.username,
-      };
+      // Backend response: { message, token, data: { username, email, ... } }
+      const res = await api.post("/login", formData);
+      const { token, data } = res.data || {};
 
-      localStorage.setItem("user", JSON.stringify(dataLogin));
-      setUser(dataLogin);
+      if (!token || !data) {
+        throw new Error("Login response tidak valid");
+      }
+
+      // Simpan token & data user
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(data));
+      setUser(data);
+
       navigate("/");
     } catch (error) {
-      if (error.response) {
-        // Server memberikan response error, misal 401, 500
-        console.error("Backend error:", error.response.data.message);
-        setMessage(error.response.data.message);
-      } else {
-        // Error lain, misal jaringan
-        console.error("Error:", error.message);
-      }
+      const msg = error?.response?.data?.message || error.message || "Login gagal";
+      console.error("Login error:", msg);
+      setMessage(msg);
     }
   };
 
@@ -78,6 +71,7 @@ function Login() {
               className="outline-0 border-0"
             />
           </InputLogin>
+
           <InputLogin>
             <Lock
               color="currentColor"
@@ -93,11 +87,13 @@ function Login() {
               className="outline-0 border-0"
             />
           </InputLogin>
+
           {message && (
             <p className="py-2 text-white text-center bg-red-800 rounded w-[60%] mx-auto">
               {message}
             </p>
           )}
+
           <button
             type="submit"
             className="hover:cursor-pointer hover:bg-gray-900 backdrop-blur-3xl bg-gray-900/30 px-4 py-3 w-[40%] text-gray-200 tracking-widest text-xl mt-5"

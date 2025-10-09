@@ -1,9 +1,17 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user"))); // null if not logged in
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("user");
+      if (saved) setUser(JSON.parse(saved));
+    } catch {}
+  }, []);
+
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       {children}
@@ -11,6 +19,6 @@ export function AuthProvider({ children }) {
   );
 }
 
-// export function useAuth() {
-//   return useContext(AuthContext);
-// }
+export function useAuth() {
+  return useContext(AuthContext);
+}
