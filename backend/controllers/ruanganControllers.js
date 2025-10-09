@@ -1,52 +1,66 @@
 //require config database
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 //tambahkan barang
 exports.createRuangan = async (req, res) => {
-    try {
-        const { nama_ruangan } = req.body;
-        const ruangan = await prisma.ruangan.create({
-            data: { nama_ruangan }, 
-        });
-         res.json({ message : 'Ruangan berhasil ditambahkan', ruangan});
-    } catch (error) {
-        res.status(500).json({ error : error.message});
-    }
+  try {
+    const { nama_ruangan } = req.body;
+    console.log(nama_ruangan);
+    const ruangan = await prisma.ruangan.create({
+      data: { nama_ruangan },
+    });
+    res.json({ message: "Ruangan berhasil ditambahkan", ruangan });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 //read - semua barang
 exports.getAllRuangan = async (req, res) => {
-    try {
-        const ruangan = await prisma.ruangan.findMany();
-        res.json(ruangan);
-    } catch (error) {
-        res.status(500).json({ error: error.message});
-    }
- 
+  try {
+    const ruangan = await prisma.ruangan.findMany();
+    res.json(ruangan);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//read - semua barang
+exports.getRuanganById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ruangan = await prisma.ruangan.findUnique({
+      where: { id: Number(id) },
+    });
+    if (!ruangan)
+      return res.status(404).json({ message: "Barang tidak ditemukan" });
+    res.status(200).json(ruangan);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 exports.updateRuangan = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const {nama_ruangan} = req.body;
-        const ruangan = await prisma.ruangan.update({
-            where : { id : Number(id)},
-            data : {nama_ruangan}
-        });
-        res.json({message : 'Data Ruangan Berhasil diupdate', ruangan});
-    } catch (error) {
-        res.status(500).json({error : error.message});
-    }
+  try {
+    const { id } = req.params;
+    const { nama_ruangan } = req.body;
+    const ruangan = await prisma.ruangan.update({
+      where: { id: Number(id) },
+      data: { nama_ruangan },
+    });
+    res.json({ message: "Data Ruangan Berhasil diupdate", ruangan });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
-
 exports.deleteRuangan = async (req, res) => {
-    try {
-        const { id } = req.params;
-        await prisma.ruangan.delete ({where : { id : Number(id)}});
-        res.json({message : "Barang Berhasil Dihapus"});
-    } catch (error) {
-        res.status(500).json({error : error.message});
-    }
+  try {
+    const { id } = req.params;
+    await prisma.ruangan.delete({ where: { id: Number(id) } });
+    res.status(200).json({ message: "Barang Berhasil Dihapus" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
