@@ -31,6 +31,7 @@ export default function RowActions({
       if (res.isConfirmed) {
         onDelete?.();
         Swal.fire("Berhasil", "Data telah dihapus", "success");
+        navigate(`${basePath}`);
       }
     });
   };

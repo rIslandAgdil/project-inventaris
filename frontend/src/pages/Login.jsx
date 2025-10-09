@@ -3,14 +3,12 @@ import { Lock } from "lucide-react";
 import { User } from "lucide-react";
 import { baseUrl } from "../api/api";
 import axios from "axios";
-import { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
-  const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -27,15 +25,12 @@ function Login() {
 
     try {
       const res = await axios.post(`${baseUrl}/login`, formData);
-      const { token } = res.data;
-      const dataLogin = {
-        token,
-        email: res.email,
-        username: res.username,
-      };
+      const { token, username, idUser } = res.data;
 
-      localStorage.setItem("user", JSON.stringify(dataLogin));
-      setUser(dataLogin);
+      localStorage.setItem("token", JSON.stringify(token));
+      localStorage.setItem("username", JSON.stringify(username));
+      localStorage.setItem("idUser", JSON.stringify(idUser));
+
       navigate("/");
     } catch (error) {
       if (error.response) {

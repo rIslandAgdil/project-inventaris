@@ -1,72 +1,61 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios"; // ✅ perlu diimport
+import Swal from "sweetalert2"; // ✅ perlu diimport
+import { baseUrl } from "../../api/api";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
 import RowActions from "../../components/RowActions";
-
-const DUMMY_BARANG = [
-  {
-    id: 1,
-    no: 1,
-    name: "Printer",
-    kode_inventaris: "INV-0001",
-    jumlah: 3,
-    kondisi: "Baik",
-    ruangan: "Ruang B101",
-    user: "Nofryanti",
-  },
-  // ...
-];
 
 export default function Databarang() {
   const [barang, setBarang] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => {
-      const withNo = DUMMY_BARANG.map((item, idx) => ({
-        ...item,
-        no: idx + 1,
-      }));
-      setBarang(withNo);
-      setLoading(false);
-    }, 400);
-    return () => clearTimeout(t);
-  }, []);
-
-  const handleDelete = (row) => {
-    Swal.fire({
-      title: "Yakin?",
-      text: `Hapus ${row.name}?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Ya, hapus",
-      cancelButtonText: "Batal",
-    }).then((res) => {
-      if (res.isConfirmed) {
-        setbarang((prev) => {
-          const filtered = prev.filter((p) => p.id !== row.id);
-
-          return filtered.map((it, idx) => ({ ...it, no: idx + 1 }));
-        });
-        Swal.fire("Berhasil", "barang telah dihapus (lokal)", "success");
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // pastikan endpoint sesuai backend-mu
+        const res = await axios.get(`${baseUrl}/barang`);
+        const data = res.data.map((item, idx) => ({
+          id: item.id,
+          no: idx + 1,
+          name: item.nama_barang,
+          kode_inventaris: item.kode_inventaris,
+          jumlah: item.jumlah,
+          kondisi: item.kondisi,
+          ruangan: item.ruangan?.nama_ruangan || "-",
+          user: item.user?.username || "-", // ✅ ganti nama field
+        }));
+        setBarang(data);
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Gagal", "Gagal memuat data barang", "error");
+      } finally {
+        setLoading(false);
       }
-    });
-  };
-  const removeById = (id) => {
-    setBarang((prev) =>
-      prev.filter((p) => p.id !== id).map((it, i) => ({ ...it, no: i + 1 }))
-    );
+    };
+
+    fetchData();
+  }, [location.key]);
+
+  const removeById = async (id) => {
+    try {
+      await axios.delete(`${baseUrl}/barang/${id}`);
+    } catch (error) {
+      return console.log("Gagal Menghapus Data");
+    }
   };
 
+  // ✅ ubah toLowerCase untuk kode_inventaris agar tidak error
   const filtered = barang.filter(
     (p) =>
       p.name.toLowerCase().includes(q.toLowerCase()) ||
-      p.kode_inventaris.toLowerCase().includes(q.toLowerCase())
+      p.kode_inventaris.toString().toLowerCase().includes(q.toLowerCase())
   );
 
   const columns = [
@@ -85,7 +74,7 @@ export default function Databarang() {
           basePath="/barang"
           id={row.id}
           onDelete={() => removeById(row.id)}
-          getDeleteName={() => row.username}
+          getDeleteName={() => row.name} // ✅ gunakan row.name, bukan row.username
         />
       ),
     },
@@ -95,7 +84,7 @@ export default function Databarang() {
     <PageShell breadcrumb={[{ label: "Home", to: "/" }, { label: "Barang" }]}>
       <div>
         <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="text-2xl font-semibold text-gray-700">Data barang</h2>
+          <h2 className="text-2xl font-semibold text-gray-700">Data Barang</h2>
           <div className="flex items-center gap-2">
             <input
               type="text"
@@ -108,7 +97,7 @@ export default function Databarang() {
               variant="secondary"
               onClick={() => navigate("/barang/tambah")}
             >
-              + Tambah barang
+              + Tambah Barang
             </Button>
           </div>
         </div>

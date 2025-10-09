@@ -10,7 +10,7 @@ datasource db {
 model barang {
   id              Int     @id @default(autoincrement())
   nama_barang     String  @db.Text
-  kode_inventaris Int     @unique
+  kode_inventaris String  @unique @db.VarChar(255)
   jumlah          Int
   kondisi         String
   ruanganId       Int

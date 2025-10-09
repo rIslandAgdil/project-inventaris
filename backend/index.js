@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/", loginRouter);
-app.use("/api", barangRoutes);
+app.use("/barang", barangRoutes);
 app.use("/ruangan", ruanganRoutes);
 
 app.listen(PORT, () => {
