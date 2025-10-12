@@ -11,6 +11,7 @@ import RowActions from "../../components/RowActions";
 export default function Databarang() {
   const [barang, setBarang] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [q, setQ] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,8 +34,7 @@ export default function Databarang() {
         }));
         setBarang(data);
       } catch (err) {
-        console.error(err);
-        Swal.fire("Gagal", "Gagal memuat data barang", "error");
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -47,7 +47,7 @@ export default function Databarang() {
     try {
       await axios.delete(`${baseUrl}/barang/${id}`);
     } catch (error) {
-      return console.log("Gagal Menghapus Data");
+      return console.log(error.message);
     }
   };
 
@@ -80,6 +80,12 @@ export default function Databarang() {
     },
   ];
 
+  const emptyText = loading
+    ? "Memuat..."
+    : error
+    ? `Gagal memuat data`
+    : "Tidak ada data";
+
   return (
     <PageShell breadcrumb={[{ label: "Home", to: "/" }, { label: "Barang" }]}>
       <div>
@@ -102,11 +108,7 @@ export default function Databarang() {
           </div>
         </div>
 
-        {loading ? (
-          <p>Loading…</p>
-        ) : (
-          <Table columns={columns} data={filtered} />
-        )}
+        <Table columns={columns} data={filtered} emptyText={emptyText} />
       </div>
     </PageShell>
   );

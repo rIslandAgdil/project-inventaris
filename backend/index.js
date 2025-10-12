@@ -27,18 +27,11 @@ const PORT = process.env.PORT;
 
 const app = express();
 
-
 app.use(express.json());
 app.use(cors());
 
-app.get("/health", (_, res) => res.json({ ok: true }));
-
-// app.use("/api/auth", loginRouter);
-app.use("/api/users", userRoutes);
-// app.use("/api/barang", barangRoutes);
-// app.use("/api/ruangan", ruanganRoutes);
-
 app.use("/", loginRouter);
+app.use("/users", userRoutes);
 app.use("/barang", barangRoutes);
 app.use("/ruangan", ruanganRoutes);
 
