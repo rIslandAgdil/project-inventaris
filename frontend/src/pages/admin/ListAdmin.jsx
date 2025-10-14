@@ -90,7 +90,7 @@ export default function ListAdmin() {
   const emptyText = loading
     ? "Memuat..."
     : error
-    ? `Terjadi kesalahan: ${error}`
+    ? `Gagal memuat data`
     : "Tidak ada data";
 
   return (

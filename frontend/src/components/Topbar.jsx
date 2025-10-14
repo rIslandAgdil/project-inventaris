@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 export default function Topbar({ breadcrumb = [], onOpenMenu }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { setAuth } = useContext(AuthContext);
+  const { setAuth, username } = useContext(AuthContext);
 
   const handleLogout = async () => {
     const { isConfirmed } = await Swal.fire({
@@ -72,7 +72,7 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
             className="flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-slate-50"
             onClick={() => setOpen((v) => !v)}
           >
-            <span className="text-sm">Akun</span>
+            <span className="text-sm">{username}</span>
             <ChevronDown size={16} />
           </button>
           {open && (

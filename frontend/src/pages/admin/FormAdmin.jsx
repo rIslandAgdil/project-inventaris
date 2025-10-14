@@ -63,7 +63,7 @@ export default function FormAdmin({ mode = "view" }) {
   };
 
   useEffect(() => {
-    if (mode === "create") return setLoading(false);
+    if (mode === "create" || mode === "password") return setLoading(false);
 
     fetchData();
   }, [mode]);
@@ -101,7 +101,7 @@ export default function FormAdmin({ mode = "view" }) {
           inputPlaceholder: "Password",
           showCancelButton: true,
           cancelButtonText: "Batal",
-          confirmButtonText: "Ya, Hapus",
+          confirmButtonText: "Kirim",
           confirmButtonColor: "#e11d48",
           reverseButtons: true,
           focusCancel: true,
@@ -115,7 +115,7 @@ export default function FormAdmin({ mode = "view" }) {
                 password: value,
                 newPassword: form.confirmPassword.trim(),
               });
-              await Swal.fire("Berhasil", "Data telah dihapus", "success");
+              await Swal.fire("Berhasil", "Password telah diubah", "success");
             } catch (e) {
               Swal.showValidationMessage(
                 e?.response?.data?.error || e.message || "Gagal menghapus."

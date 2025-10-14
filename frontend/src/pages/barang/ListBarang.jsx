@@ -55,7 +55,9 @@ export default function Databarang() {
   const filtered = barang.filter(
     (p) =>
       p.name.toLowerCase().includes(q.toLowerCase()) ||
-      p.kode_inventaris.toString().toLowerCase().includes(q.toLowerCase())
+      p.kode_inventaris.toString().toLowerCase().includes(q.toLowerCase()) ||
+      p.ruangan.toLowerCase().includes(q.toLowerCase()) ||
+      p.user.toLowerCase().includes(q.toLowerCase())
   );
 
   const columns = [
