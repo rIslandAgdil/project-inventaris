@@ -46,7 +46,7 @@ function Login() {
 
   return (
     <div className="w-dvw h-dvh flex justify-center items-center bg-[url(/bg-login-2.jpg)]">
-      <div className="w-xl h-[400px] p-4">
+      <div className="w-xl p-4">
         <img
           src="./profile.png"
           alt="profile"

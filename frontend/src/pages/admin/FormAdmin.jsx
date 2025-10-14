@@ -63,8 +63,7 @@ export default function FormAdmin({ mode = "view" }) {
   };
 
   useEffect(() => {
-    if (!(mode === "edit" || mode === "view" || mode === "password" || idUser))
-      return;
+    if (mode === "create") return setLoading(false);
 
     fetchData();
   }, [mode]);
