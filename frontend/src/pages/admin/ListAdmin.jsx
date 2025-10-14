@@ -1,55 +1,46 @@
 // src/pages/admin/ListAdmin.jsx
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { baseUrl } from "../../api/api";
+import axios from "axios";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
 import RowActions from "../../components/RowActions";
-import { api } from "../../api/api";
 import Swal from "sweetalert2";
 
-const USERS_ENDPOINT = "/api/users";
-
 export default function ListAdmin() {
-  const [rows, setRows] = useState([]);
-  const [q, setQ] = useState("");
+  const [users, setUsers] = useState();
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const res = await api.get(USERS_ENDPOINT); // -> http://localhost:5000/api/users
-        const data = Array.isArray(res?.data?.data)
-          ? res.data.data
-          : Array.isArray(res?.data)
-          ? res.data
-          : [];
-        const withNo = data.map((it, i) => ({ ...it, no: i + 1 }));
-        setRows(withNo);
-        setError("");
-      } catch (e) {
-        setRows([]);
-        setError(e?.response?.data?.error || e.message || "Gagal memuat data users");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    fetchData();
+  }, [location.key]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${baseUrl}/users`);
+      const data = res.data.data.map((item, idx) => ({ ...item, no: idx + 1 }));
+
+      setUsers(data);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Hapus user: terima password konfirmasi dari RowActions
   const removeById = async (id, confirmPassword) => {
     try {
-      await api.delete(`${USERS_ENDPOINT}/${id}`, {
+      await axios.delete(`${baseUrl}/users/${id}`, {
         data: { confirmPassword }, // kirim password ke backend
       });
-      setRows((prev) =>
-        (Array.isArray(prev) ? prev : [])
-          .filter((p) => p.id !== id)
-          .map((it, i) => ({ ...it, no: i + 1 }))
-      );
     } catch (e) {
       Swal.fire({
         icon: "error",
@@ -61,8 +52,8 @@ export default function ListAdmin() {
   };
 
   const filtered = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    const src = Array.isArray(rows) ? rows : [];
+    const s = search.trim().toLowerCase();
+    const src = Array.isArray(users) ? users : [];
     if (!s) return src;
     return src.filter(
       (r) =>
@@ -70,7 +61,7 @@ export default function ListAdmin() {
         (r?.username ?? "").toLowerCase().includes(s) ||
         (r?.email ?? "").toLowerCase().includes(s)
     );
-  }, [rows, q]);
+  }, [users, search]);
 
   const columns = useMemo(
     () => [
@@ -84,18 +75,23 @@ export default function ListAdmin() {
           <RowActions
             basePath="/admin"
             id={row.id}
-            requireDeletePassword              // ← hanya di Users
-            onDelete={(pwd) => removeById(row.id, pwd)} // pwd dari modal RowActions
+            requireDeletePassword // ← hanya di Users
+            onDelete={removeById}
+            hideEdit
             getDeleteName={() => row.username}
             labels={{ view: "Detail", edit: "Ubah", delete: "Hapus" }}
           />
         ),
       },
     ],
-    [removeById]
+    []
   );
 
-  const emptyText = loading ? "Memuat..." : error || "Tidak ada data";
+  const emptyText = loading
+    ? "Memuat..."
+    : error
+    ? `Gagal memuat data`
+    : "Tidak ada data";
 
   return (
     <PageShell breadcrumb={[{ label: "Home", to: "/" }, { label: "Admin" }]}>
@@ -104,9 +100,9 @@ export default function ListAdmin() {
         <div className="flex items-center gap-2">
           <input
             type="text"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Cari no/username/email"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari username/email"
             className="border rounded-md px-3 py-2 text-sm"
           />
           <Button variant="secondary" onClick={() => navigate("/admin/tambah")}>

@@ -5,12 +5,13 @@ import { baseUrl } from "../../api/api";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
-import Swal from "sweetalert2";
+// import Swal from "sweetalert2";
 import RowActions from "../../components/RowActions";
 
 export default function DataRuangan() {
   const [ruangan, setRuangan] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [q, setQ] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,8 +25,7 @@ export default function DataRuangan() {
         const data = res.data.map((item, idx) => ({ ...item, no: idx + 1 }));
         setRuangan(data);
       } catch (err) {
-        console.error(err);
-        Swal.fire("Gagal", "Gagal memuat data barang", "error");
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -38,7 +38,7 @@ export default function DataRuangan() {
     try {
       await axios.delete(`${baseUrl}/ruangan/${id}`);
     } catch (error) {
-      return console.log("Gagal Menghapus Data");
+      return console.log(error.message);
     }
   };
 
@@ -64,6 +64,12 @@ export default function DataRuangan() {
     },
   ];
 
+  const emptyText = loading
+    ? "Memuat..."
+    : error
+    ? `Gagal memuat data`
+    : "Tidak ada data";
+
   return (
     <PageShell breadcrumb={[{ label: "Home", to: "/" }, { label: "Ruangan" }]}>
       <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
@@ -85,7 +91,7 @@ export default function DataRuangan() {
         </div>
       </div>
 
-      {loading ? <p>Loading…</p> : <Table columns={columns} data={filtered} />}
+      <Table columns={columns} data={filtered} emptyText={emptyText} />
     </PageShell>
   );
 }

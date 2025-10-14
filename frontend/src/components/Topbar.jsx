@@ -1,11 +1,13 @@
 import { ChevronDown, Menu } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
 import Swal from "sweetalert2";
 
 export default function Topbar({ breadcrumb = [], onOpenMenu }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { setAuth, username } = useContext(AuthContext);
 
   const handleLogout = async () => {
     const { isConfirmed } = await Swal.fire({
@@ -15,7 +17,8 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
       showCancelButton: true,
       confirmButtonText: "Ya, logout",
       cancelButtonText: "Batal",
-      confirmButtonColor: "#16a34a",
+      confirmButtonColor: "#e11d48",
+      reverseButtons: true,
     });
     if (!isConfirmed) return;
 
@@ -23,7 +26,9 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
     localStorage.removeItem("username");
     localStorage.removeItem("token");
     localStorage.removeItem("idUser");
-    
+
+    setAuth({ username: null, token: null, idUser: null });
+
     setOpen(false);
     navigate("/login");
   };
@@ -34,7 +39,7 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
         <div className="flex items-center gap-3 min-w-0">
           {/* button menu saat mobile */}
           <button
-            className="md:hidden p-2 rounded-md hover:bg-slate-100"
+            className="lg:hidden p-2 rounded-md hover:bg-slate-100"
             onClick={onOpenMenu}
             aria-label="Buka menu"
           >
@@ -47,7 +52,10 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
                 <li key={i} className="flex items-center gap-2 truncate">
                   {i > 0 && <span className="text-slate-300">/</span>}
                   {item.to ? (
-                    <Link to={item.to} className="hover:text-slate-700 truncate">
+                    <Link
+                      to={item.to}
+                      className="hover:text-slate-700 truncate"
+                    >
                       {item.label}
                     </Link>
                   ) : (
@@ -64,17 +72,29 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
             className="flex items-center gap-2 px-3 py-1.5 rounded-md border hover:bg-slate-50"
             onClick={() => setOpen((v) => !v)}
           >
-            <span className="text-sm">Akun</span>
+            <span className="text-sm">{username}</span>
             <ChevronDown size={16} />
           </button>
           {open && (
-            <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow">
-              <button
-                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50"
+            <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow overflow-hidden tracking-wide z-999">
+              <div
+                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-600 hover:text-white cursor-pointer"
+                onClick={() => navigate(`/admin/edit`)}
+              >
+                Edit Profile
+              </div>
+              <div
+                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-600 hover:text-white cursor-pointer border-gray-300 border-t border-b"
+                onClick={() => navigate(`/admin/password`)}
+              >
+                Ganti Password
+              </div>
+              <div
+                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-600 hover:text-white cursor-pointer"
                 onClick={handleLogout}
               >
                 Logout
-              </button>
+              </div>
             </div>
           )}
         </div>

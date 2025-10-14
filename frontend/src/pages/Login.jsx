@@ -3,14 +3,15 @@ import { Lock } from "lucide-react";
 import { User } from "lucide-react";
 import { baseUrl } from "../api/api";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { api } from "../api/api";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const { setAuth } = useContext(AuthContext);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,13 +26,19 @@ function Login() {
       const res = await axios.post(`${baseUrl}/login`, formData);
       const { token, username, idUser } = res.data;
 
+      // SIMPAN DATA LOGIN DI LOCALSTORAGE
+      // biar pas refresh halaman, data login ga ilang
+      // dan bisa diakses di context
+      // (tapi kalo mau lebih aman, pake httpOnly cookie aja)
       localStorage.setItem("token", JSON.stringify(token));
       localStorage.setItem("username", JSON.stringify(username));
       localStorage.setItem("idUser", JSON.stringify(idUser));
+      setAuth({ token, username, idUser });
 
       navigate("/");
     } catch (error) {
-      const msg = error?.response?.data?.message || error.message || "Login gagal";
+      const msg =
+        error?.response?.data?.message || error.message || "Login gagal";
       console.error("Login error:", msg);
       setMessage(msg);
     }
@@ -39,7 +46,7 @@ function Login() {
 
   return (
     <div className="w-dvw h-dvh flex justify-center items-center bg-[url(/bg-login-2.jpg)]">
-      <div className="w-xl h-[400px] p-4">
+      <div className="w-xl p-4">
         <img
           src="./profile.png"
           alt="profile"
