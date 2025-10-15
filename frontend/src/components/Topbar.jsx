@@ -1,4 +1,4 @@
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu, LogOut, Key, Edit2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -78,21 +78,24 @@ export default function Topbar({ breadcrumb = [], onOpenMenu }) {
           {open && (
             <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow overflow-hidden tracking-wide z-999">
               <div
-                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-600 hover:text-white cursor-pointer"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-600 hover:text-white cursor-pointer flex items-center gap-2"
                 onClick={() => navigate(`/admin/edit`)}
               >
+                <Edit2 size={16} />
                 Edit Profile
               </div>
               <div
-                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-600 hover:text-white cursor-pointer border-gray-300 border-t border-b"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-600 hover:text-white cursor-pointer border-gray-300 border-t border-b flex items-center gap-2"
                 onClick={() => navigate(`/admin/password`)}
               >
+                <Key size={16} />
                 Ganti Password
               </div>
               <div
-                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-600 hover:text-white cursor-pointer"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-slate-600 hover:text-white cursor-pointer flex items-center gap-2"
                 onClick={handleLogout}
               >
+                <LogOut size={16} />
                 Logout
               </div>
             </div>

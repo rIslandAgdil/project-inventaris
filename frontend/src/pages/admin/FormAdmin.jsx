@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { EyeOff, Eye } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { baseUrl } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
@@ -30,6 +31,8 @@ function pickOne(payload) {
 export default function FormAdmin({ mode = "view" }) {
   const { idUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(!!idUser);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   // create: password; edit: confirmPassword (wajib), newPassword (opsional)
@@ -259,31 +262,51 @@ export default function FormAdmin({ mode = "view" }) {
                     <label className="block text-sm text-slate-700 mb-1">
                       Password
                     </label>
-                    <input
-                      name="password"
-                      type="password"
-                      value={form.password}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-sm"
-                      placeholder="Minimal 4 karakter"
-                      minLength={4}
-                      required
-                    />
+                    <div className="relative">
+                      <input
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        value={form.password}
+                        onChange={handleChange}
+                        className="w-full border rounded-md px-3 py-2 text-sm"
+                        placeholder="Minimal 4 karakter"
+                        minLength={4}
+                        required
+                      />
+                      <div className="absolute right-0 top-0 mt-2 mr-3 hover:cursor-pointer bg-amber-50 pl-2">
+                        {showPassword ? (
+                          <EyeOff onClick={() => setShowPassword(false)} />
+                        ) : (
+                          <Eye onClick={() => setShowPassword(true)} />
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm text-slate-700 mb-1">
                       Konfirmasi Password
                     </label>
-                    <input
-                      name="confirmPassword"
-                      type="password"
-                      value={form.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-sm"
-                      placeholder="Minimal 4 karakter"
-                      minLength={4}
-                      required
-                    />
+                    <div className="relative">
+                      <input
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={form.confirmPassword}
+                        onChange={handleChange}
+                        className="w-full border rounded-md px-3 py-2 text-sm"
+                        placeholder="Minimal 4 karakter"
+                        minLength={4}
+                        required
+                      />
+                      <div className="absolute right-0 top-0 mt-2 mr-3 hover:cursor-pointer bg-amber-50 pl-2">
+                        {showConfirmPassword ? (
+                          <EyeOff
+                            onClick={() => setShowConfirmPassword(false)}
+                          />
+                        ) : (
+                          <Eye onClick={() => setShowConfirmPassword(true)} />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
