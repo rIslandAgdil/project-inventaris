@@ -1,6 +1,5 @@
 import Input from "../components/Input";
-import { Lock } from "lucide-react";
-import { User } from "lucide-react";
+import { Lock, User, Eye, EyeOff } from "lucide-react";
 import { baseUrl } from "../api/api";
 import axios from "axios";
 import { useState, useContext } from "react";
@@ -10,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { setAuth } = useContext(AuthContext);
 
@@ -80,7 +80,7 @@ function Login() {
               className="w-20 h-15 bg-gray-300/10 p-3"
             />
             <Input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               name="password"
               required={true}
@@ -88,6 +88,21 @@ function Login() {
               onChange={handleChange}
               className="outline-0 border-0"
             />
+            {showPassword ? (
+              <Eye
+                size={30}
+                color="currentColor"
+                className="absolute right-0 mr-3 hover:cursor-pointer"
+                onClick={() => setShowPassword(false)}
+              />
+            ) : (
+              <EyeOff
+                color="currentColor"
+                size={30}
+                className="absolute right-0 mr-3 hover:cursor-pointer"
+                onClick={() => setShowPassword(true)}
+              />
+            )}
           </InputLogin>
 
           {message && (
@@ -112,7 +127,7 @@ export default Login;
 
 const InputLogin = ({ children }) => {
   return (
-    <div className="flex items-center bg-gray-300/70 rounded-sm overflow-hidden w-[90%] pr-3 backdrop-blur-md">
+    <div className="relative flex items-center bg-gray-300/70 rounded-sm overflow-hidden w-[90%] backdrop-blur-md">
       {children}
     </div>
   );
