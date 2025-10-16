@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
-import { baseUrl } from "../../api/api";
+import { getRuangan, deleteRuangan } from "../../services";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
-// import Swal from "sweetalert2";
 import RowActions from "../../components/RowActions";
 
 export default function DataRuangan() {
@@ -18,12 +16,17 @@ export default function DataRuangan() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        // pastikan endpoint sesuai backend-mu
-        const res = await axios.get(`${baseUrl}/ruangan`);
-        const data = res.data.map((item, idx) => ({ ...item, no: idx + 1 }));
-        setRuangan(data);
+        // ✅ panggil getRuangan untuk fetch data
+        const data = await getRuangan();
+
+        // ✅ transform data sesuai kebutuhan
+        // tambahkan nomor urut pada setiap item
+        const newData = data.map((item, idx) => ({ ...item, no: idx + 1 }));
+
+        // ✅ set state dengan data yang sudah di-transform
+        setRuangan(newData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -36,7 +39,7 @@ export default function DataRuangan() {
 
   const removeById = async (id) => {
     try {
-      await axios.delete(`${baseUrl}/ruangan/${id}`);
+      await deleteRuangan(id);
     } catch (error) {
       return console.log(error.message);
     }

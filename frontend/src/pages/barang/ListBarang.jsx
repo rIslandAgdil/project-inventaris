@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios"; // ✅ perlu diimport
-import Swal from "sweetalert2"; // ✅ perlu diimport
-import { baseUrl } from "../../api/api";
+import { getBarang, deleteBarang } from "../../services";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
@@ -18,11 +16,13 @@ export default function Databarang() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        // pastikan endpoint sesuai backend-mu
-        const res = await axios.get(`${baseUrl}/barang`);
-        const data = res.data.map((item, idx) => ({
+        // ✅ panggil getBarang untuk fetch data
+        const data = await getBarang();
+
+        // ✅ transform data sesuai kebutuhan
+        const newData = data.map((item, idx) => ({
           id: item.id,
           no: idx + 1,
           name: item.nama_barang,
@@ -32,8 +32,11 @@ export default function Databarang() {
           ruangan: item.ruangan?.nama_ruangan || "-",
           user: item.user?.username || "-", // ✅ ganti nama field
         }));
-        setBarang(data);
+
+        // ✅ set state dengan data yang sudah di-transform
+        setBarang(newData);
       } catch (err) {
+        // ✅ set error message jika fetch gagal
         setError(err.message);
       } finally {
         setLoading(false);
@@ -45,7 +48,7 @@ export default function Databarang() {
 
   const removeById = async (id) => {
     try {
-      await axios.delete(`${baseUrl}/barang/${id}`);
+      await deleteBarang(id);
     } catch (error) {
       return console.log(error.message);
     }

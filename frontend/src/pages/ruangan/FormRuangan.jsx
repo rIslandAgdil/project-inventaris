@@ -1,7 +1,6 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { baseUrl } from "../../api/api";
+import { createRuangan, getRuanganById, updateRuangan } from "../../services";
 import Swal from "sweetalert2";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
@@ -27,12 +26,15 @@ export default function FormRuangan() {
   }, []);
 
   const fetchData = async (id) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axios.get(`${baseUrl}/ruangan/${id}`);
+      // MENGAMBIL DATA RUANGAN BERDASARKAN ID
+      const data = await getRuanganById(id);
 
-      setForm(res.data);
+      // MENGISI DATA KE FORM
+      setForm(data);
     } catch (error) {
+      // JIKA TERJADI KESALAHAN
       console.log(error.message);
     }
     setLoading(false);
@@ -69,8 +71,8 @@ export default function FormRuangan() {
           setLoading(true);
 
           mode === "create"
-            ? await axios.post(`${baseUrl}/ruangan`, form)
-            : await axios.put(`${baseUrl}/ruangan/${id}`, form);
+            ? await createRuangan(form)
+            : await updateRuangan(id, form);
 
           Swal.fire("Sukses", `Data berhasil disimpan`, "success").then(() =>
             navigate("/ruangan")

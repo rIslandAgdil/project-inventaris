@@ -1,8 +1,7 @@
 // src/pages/admin/ListAdmin.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { baseUrl } from "../../api/api";
-import axios from "axios";
+import { getUsers, deleteUser } from "../../services";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
@@ -24,10 +23,10 @@ export default function ListAdmin() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${baseUrl}/users`);
-      const data = res.data.data.map((item, idx) => ({ ...item, no: idx + 1 }));
+      const data = await getUsers();
+      const newData = data.map((item, idx) => ({ ...item, no: idx + 1 }));
 
-      setUsers(data);
+      setUsers(newData);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -38,9 +37,7 @@ export default function ListAdmin() {
   // Hapus user: terima password konfirmasi dari RowActions
   const removeById = async (id, confirmPassword) => {
     try {
-      await axios.delete(`${baseUrl}/users/${id}`, {
-        data: { confirmPassword }, // kirim password ke backend
-      });
+      await deleteUser(id, confirmPassword);
     } catch (e) {
       Swal.fire({
         icon: "error",
