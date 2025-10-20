@@ -36,15 +36,24 @@ export default function App() {
 
           {/* Barang */}
           <Route path="/barang" element={<ListBarang />} />
-          <Route path="/barang/tambah" element={<FormBarang />} />
-          <Route path="/barang/edit/:id" element={<FormBarang />} />
-          <Route path="/barang/view/:id" element={<FormBarang />} />
+          <Route path="/barang/tambah" element={<FormBarang mode="create" />} />
+          <Route path="/barang/edit/:id" element={<FormBarang mode="edit" />} />
+          <Route path="/barang/view/:id" element={<FormBarang mode="view" />} />
 
           {/* Ruangan */}
           <Route path="/ruangan" element={<ListRuangan />} />
-          <Route path="/ruangan/tambah" element={<FormRuangan />} />
-          <Route path="/ruangan/edit/:id" element={<FormRuangan />} />
-          <Route path="/ruangan/view/:id" element={<FormRuangan />} />
+          <Route
+            path="/ruangan/tambah"
+            element={<FormRuangan mode="create" />}
+          />
+          <Route
+            path="/ruangan/edit/:id"
+            element={<FormRuangan mode="edit" />}
+          />
+          <Route
+            path="/ruangan/view/:id"
+            element={<FormRuangan mode="view" />}
+          />
 
           {/* Admin */}
           <Route path="/admin" element={<ListAdmin />} />

@@ -1,32 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { EyeOff, Eye } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
-import { baseUrl } from "../../api/api";
 import { AuthContext } from "../../context/AuthContext";
+import { createUser, getUserById, updateUser } from "../../services";
 import Swal from "sweetalert2";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
-import axios from "axios";
-
-/**
- * Mengambil satu objek dari payload yang mungkin berbentuk array atau object.
- *
- * @param {Object|Array} payload - Data yang dikembalikan dari API.
- * @returns {Object} Objek tunggal hasil ekstraksi dari array atau object.
- *                   Jika tidak ada data, akan mengembalikan objek kosong.
- *
- * @example
- * pickOne([{ id: 1 }, { id: 2 }]); // { id: 1 }
- * pickOne({ data: [{ id: 1 }] });  // { id: 1 }
- * pickOne({ id: 1 });              // { id: 1 }
- */
-function pickOne(payload) {
-  const p = payload?.data ?? payload;
-  if (Array.isArray(p)) return p[0] ?? {};
-  if (Array.isArray(p?.data)) return p.data[0] ?? {};
-  if (p && typeof p === "object") return p;
-  return {};
-}
 
 export default function FormAdmin({ mode = "view" }) {
   const { idUser } = useContext(AuthContext);
@@ -46,21 +25,17 @@ export default function FormAdmin({ mode = "view" }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${baseUrl}/users/${idUser}`);
-      const data = pickOne(res?.data);
+      const data = await getUserById(idUser);
       setForm({
         username: data?.username ?? "",
         email: data?.email ?? "",
         password: "",
         confirmPassword: "",
       });
-      // if (!ignore) {
-      // }
     } catch (e) {
       Swal.fire("Gagal", e?.response?.data?.error || e.message, "error");
       navigate("/admin");
     } finally {
-      // if (!ignore) setLoading(false);
       setLoading(false);
     }
   };
@@ -86,6 +61,7 @@ export default function FormAdmin({ mode = "view" }) {
     try {
       setLoading(true);
 
+      // Change Password mode
       if (mode === "password") {
         if (form.password.trim() !== form.confirmPassword.trim()) {
           setLoading(false);
@@ -109,15 +85,21 @@ export default function FormAdmin({ mode = "view" }) {
           reverseButtons: true,
           focusCancel: true,
           preConfirm: async (value) => {
+            // Validasi input
             if (!value || value.length < 4) {
               Swal.showValidationMessage("Password minimal 4 karakter");
               return false;
             }
+
+            // Siapkan payload
+            const payload = {
+              password: value,
+              newPassword: form.confirmPassword.trim(),
+            };
+
+            // Kirim request ubah password
             try {
-              await axios.put(`${baseUrl}/users/${idUser}`, {
-                password: value,
-                newPassword: form.confirmPassword.trim(),
-              });
+              await updateUser(idUser, payload);
               await Swal.fire("Berhasil", "Password telah diubah", "success");
             } catch (e) {
               Swal.showValidationMessage(
@@ -131,16 +113,15 @@ export default function FormAdmin({ mode = "view" }) {
         if (!res.isConfirmed) return;
       }
 
+      // Edit Profile mode
       if (mode === "edit" && idUser) {
         const payload = {
           username: form.username,
           email: form.email,
-          // confirmPassword: form.confirmPassword.trim(),
         };
 
         try {
-          const res = await axios.put(`${baseUrl}/users/${idUser}`, payload);
-          const { username } = res.data;
+          const { username } = await updateUser(idUser, payload);
 
           localStorage.setItem("username", JSON.stringify(username));
         } catch (error) {
@@ -152,7 +133,9 @@ export default function FormAdmin({ mode = "view" }) {
         }
       }
 
+      // Create mode
       if (mode === "create") {
+        // Validasi password
         if (form.password.trim() !== form.confirmPassword.trim()) {
           setLoading(false);
           return Swal.fire(
@@ -161,12 +144,17 @@ export default function FormAdmin({ mode = "view" }) {
             "error"
           );
         }
+
+        // Siapkan payload
+        const payload = {
+          username: form.username,
+          email: form.email,
+          password: form.password.trim(),
+        };
+
+        // Kirim request pembuatan admin baru
         try {
-          await axios.post(`${baseUrl}/users`, {
-            username: form.username,
-            email: form.email,
-            password: form.password.trim(),
-          });
+          await createUser(payload);
         } catch (error) {
           return Swal.fire(
             "Gagal",

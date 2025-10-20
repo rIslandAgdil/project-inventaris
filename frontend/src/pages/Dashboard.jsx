@@ -1,12 +1,12 @@
 import PageShell from "../components/PageShell";
 import StatCard from "../components/StatCard";
-import ActivityList from "../components/ActivityList";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { baseUrl } from "../api/api";
+import { getUsers, getBarang, getRuangan } from "../services";
+import ActivityList from "../components/ActivityList";
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [dataBarang, setDataBarang] = useState();
   const [dataRuangan, setDataRuangan] = useState();
   const [dataPengguna, setDataPengguna] = useState();
@@ -18,17 +18,21 @@ export default function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [barangRes, ruanganRes, penggunaRes] = await Promise.all([
-        axios.get(`${baseUrl}/barang`),
-        axios.get(`${baseUrl}/ruangan`),
-        axios.get(`${baseUrl}/users`),
+      // Fetch data from backend
+      const [jumlahBarang, jumlahRuangan, jumlahPengguna] = await Promise.all([
+        getBarang(),
+        getRuangan(),
+        getUsers(),
       ]);
 
-      setDataBarang(barangRes.data.length);
-      setDataRuangan(ruanganRes.data.length);
-      setDataPengguna(penggunaRes.data.data.length);
+      // Update state with fetched data
+      setDataBarang(jumlahBarang.length);
+      setDataRuangan(jumlahRuangan.length);
+      setDataPengguna(jumlahPengguna.length);
     } catch (error) {
       console.error("Error fetching data:", error);
+      // Tampilkan pesan error kepada pengguna
+      setError("Gagal memuat data. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -47,14 +51,19 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {!loading ? (
+      {loading ? (
+        //jika loading tampilkan loading
+        <p className="text-center animate-pulse">Loading...</p>
+      ) : error ? (
+        //jika error tampilkan pesan error
+        <p className="text-center text-red-500">{error}</p>
+      ) : (
+        //jika data ada tampilkan data
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard title="Total Barang" value={dataBarang} />
           <StatCard title="Total Ruangan" value={dataRuangan} />
           <StatCard title="Pengguna Aktif" value={dataPengguna} />
         </div>
-      ) : (
-        <p className="text-center animate-pulse">Loading...</p>
       )}
 
       {/* <div>

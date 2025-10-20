@@ -1,10 +1,9 @@
 import Input from "../components/Input";
-import { Lock, User, Eye, EyeOff } from "lucide-react";
-import { baseUrl } from "../api/api";
-import axios from "axios";
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { User, Lock, Eye, EyeOff } from "lucide-react";
+import { login } from "../services";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -23,8 +22,7 @@ function Login() {
     setMessage("");
 
     try {
-      const res = await axios.post(`${baseUrl}/login`, formData);
-      const { token, username, idUser } = res.data;
+      const { token, username, idUser } = await login(formData);
 
       // SIMPAN DATA LOGIN DI LOCALSTORAGE
       // biar pas refresh halaman, data login ga ilang

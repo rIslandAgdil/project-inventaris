@@ -2,8 +2,12 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useMemo, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import Swal from "sweetalert2";
-import axios from "axios";
-import { baseUrl } from "../../api/api";
+import {
+  getRuangan,
+  getBarangById,
+  createBarang,
+  updateBarang,
+} from "../../services";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
 
@@ -33,17 +37,24 @@ export default function FormBarang() {
 
   useEffect(() => {
     if (mode !== "create") {
-      fetchDataUser(id);
+      fetchDataBarang(id);
     }
     fetchDataRuangan();
   }, []);
 
-  // AMBIL DATA USER
-  const fetchDataUser = async (id) => {
+  // AMBIL DATA BARANG
+  const fetchDataBarang = async (id) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axios.get(`${baseUrl}/barang/${id}`);
-      setForm(res.data);
+      const data = await getBarangById(id);
+      setForm({
+        nama_barang: data.nama_barang,
+        kode_inventaris: data.kode_inventaris,
+        jumlah: data.jumlah,
+        kondisi: data.kondisi,
+        ruanganId: data.ruanganId,
+        userId: data.userId,
+      });
     } catch (error) {
       console.log(error.message);
     }
@@ -52,10 +63,10 @@ export default function FormBarang() {
 
   // AMBIL DATA RUANGAN
   const fetchDataRuangan = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axios.get(`${baseUrl}/ruangan`);
-      setRuangan(res.data);
+      const data = await getRuangan();
+      setRuangan(data);
     } catch (error) {
       console.log(error.message);
     }
@@ -103,8 +114,8 @@ export default function FormBarang() {
           setLoading(true);
 
           mode === "create"
-            ? await axios.post(`${baseUrl}/barang`, form)
-            : await axios.put(`${baseUrl}/barang/${id}`, form);
+            ? await createBarang(form)
+            : await updateBarang(id, form);
 
           Swal.fire("Sukses", `Data berhasil disimpan`, "success").then(() =>
             navigate("/barang")

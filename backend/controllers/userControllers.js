@@ -12,7 +12,7 @@ exports.getAllUsers = async (_req, res) => {
     const sanitized = users.map(({ password, ...data }) => data);
 
     // mengirim data user ke client
-    res.json({ data: sanitized });
+    res.json(sanitized);
   } catch (error) {
     // Generic server error
     res.status(500).json({
@@ -33,7 +33,7 @@ exports.getUserById = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User tidak ditemukan" });
 
     // mengirim data user ke client
-    res.status(200).json({ data: user });
+    res.status(200).json(user);
   } catch (error) {
     // Generic server error
     res.status(500).json({
