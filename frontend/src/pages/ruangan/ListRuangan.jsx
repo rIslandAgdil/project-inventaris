@@ -1,49 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getRuangan, deleteRuangan } from "../../services";
+import { useFetchDataRuangan } from "../../hooks/ruangan/useFetchRuangan";
+import { useDeleteRuangan } from "../../hooks/ruangan/useDeleteRuangan";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
 import RowActions from "../../components/RowActions";
 
 export default function DataRuangan() {
-  const [ruangan, setRuangan] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [q, setQ] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const {
+    ruangan,
+    loading: loadingFetch,
+    error: errorFetch,
+    handleFetchRuangan,
+  } = useFetchDataRuangan();
+  const { handleDeleteRuangan } = useDeleteRuangan();
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // ✅ panggil getRuangan untuk fetch data
-        const data = await getRuangan();
-
-        // ✅ transform data sesuai kebutuhan
-        // tambahkan nomor urut pada setiap item
-        const newData = data.map((item, idx) => ({ ...item, no: idx + 1 }));
-
-        // ✅ set state dengan data yang sudah di-transform
-        setRuangan(newData);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    handleFetchRuangan();
   }, [location.key]);
-
-  const removeById = async (id) => {
-    try {
-      await deleteRuangan(id);
-    } catch (error) {
-      return console.log(error.message);
-    }
-  };
 
   const filtered = ruangan.filter((p) => {
     const s = q.toLowerCase();
@@ -60,16 +38,16 @@ export default function DataRuangan() {
         <RowActions
           basePath="/ruangan"
           id={row.id}
-          onDelete={() => removeById(row.id)}
+          onDelete={() => handleDeleteRuangan(row.id)}
           getDeleteName={() => row.username}
         />
       ),
     },
   ];
 
-  const emptyText = loading
+  const emptyText = loadingFetch
     ? "Memuat..."
-    : error
+    : errorFetch
     ? `Gagal memuat data`
     : "Tidak ada data";
 

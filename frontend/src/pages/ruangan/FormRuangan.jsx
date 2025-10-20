@@ -1,88 +1,54 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { createRuangan, getRuanganById, updateRuangan } from "../../services";
-import Swal from "sweetalert2";
+import { useFetchDataRuangan } from "../../hooks/ruangan/useFetchRuangan";
+import { useCreateRuangan } from "../../hooks/ruangan/useCreateRuangan";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
 
-export default function FormRuangan() {
+export default function FormRuangan({ mode }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
+  const {
+    handleFetchRuanganById,
+    ruangan,
+    loading: fetchLoading,
+    error: fetchError,
+  } = useFetchDataRuangan();
+  const { handleCreateRuangan, loading: createLoading } = useCreateRuangan();
+  const [form, setForm] = useState({
+    nama_ruangan: ruangan.nama_ruangan ?? "",
+  });
 
-  const mode = location.pathname.includes("/view/")
-    ? "view"
-    : id
-    ? "edit"
-    : "create";
+  // Menggabungkan status loading dan error dari fetch dan create
+  const loading = fetchLoading || createLoading;
 
-  const [form, setForm] = useState({ nama_ruangan: "" });
-  const [loading, setLoading] = useState(!!id);
+  // Gabungkan error dari fetch dan create
+  const error = fetchError;
 
+  // Mengambil data ruangan saat komponen dimount jika mode bukan "create"
   useEffect(() => {
     if (mode !== "create") {
-      fetchData(id);
+      handleFetchRuanganById(id);
     }
-  }, []);
+  }, [id, mode]);
 
-  const fetchData = async (id) => {
-    setLoading(true);
-    try {
-      // MENGAMBIL DATA RUANGAN BERDASARKAN ID
-      const data = await getRuanganById(id);
-
-      // MENGISI DATA KE FORM
-      setForm(data);
-    } catch (error) {
-      // JIKA TERJADI KESALAHAN
-      console.log(error.message);
+  // Mentransfer data ruangan ke form ketika data ruangan berubah
+  useEffect(() => {
+    if (ruangan.nama_ruangan) {
+      setForm({ nama_ruangan: ruangan.nama_ruangan });
     }
-    setLoading(false);
-  };
+  }, [ruangan]);
 
+  // Menentukan apakah form dalam mode read-only
   const readOnly = mode === "view";
   const titleMap = { create: "Tambah", edit: "Edit", view: "Detail" };
 
   const handleChange = (e) => setForm({ nama_ruangan: e.target.value });
 
+  // Menangani submit form
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // JIKA DATA BELUM LENGKAP
-    if (!form.nama_ruangan.trim()) {
-      Swal.fire("Validasi", "Nama ruangan wajib diisi", "warning");
-      return;
-    }
-
-    // JIKA DATA LENGKAP
-    Swal.fire({
-      title: "Simpan Data?",
-      text: `Pastikan data yang anda input sudah benar!`,
-      icon: "question",
-      showCancelButton: true,
-      cancelButtonText: "Batal",
-      confirmButtonText: "Simpan",
-      reverseButtons: true,
-      focusCancel: true,
-      confirmButtonColor: "#e11d48",
-    }).then(async (res) => {
-      if (res.isConfirmed) {
-        try {
-          setLoading(true);
-
-          mode === "create"
-            ? await createRuangan(form)
-            : await updateRuangan(id, form);
-
-          Swal.fire("Sukses", `Data berhasil disimpan`, "success").then(() =>
-            navigate("/ruangan")
-          );
-        } catch (error) {
-          console.log(error.message);
-        }
-        setLoading(false);
-      }
-    });
+    handleCreateRuangan(id, mode, form);
   };
 
   return (
@@ -112,6 +78,8 @@ export default function FormRuangan() {
 
           {loading ? (
             <div className="px-6 py-6">Loading…</div>
+          ) : error ? (
+            <div className="px-6 py-6 text-red-600">{error}</div>
           ) : (
             <form onSubmit={handleSubmit} className="px-6 py-6 grid gap-4">
               <div>

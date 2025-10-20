@@ -9,15 +9,15 @@ export const getRuanganById = async (id) => {
 };
 
 export const createRuangan = async (ruanganData) => {
-  return (await axiosInstance.post("/ruangan", ruanganData)).data;
+  return await axiosInstance.post("/ruangan", ruanganData);
 };
 
 export const updateRuangan = async (id, ruanganData) => {
-  return (await axiosInstance.put(`/ruangan/${id}`, ruanganData)).data;
+  return await axiosInstance.put(`/ruangan/${id}`, ruanganData);
 };
 
 export const deleteRuangan = async (id) => {
-  return (await axiosInstance.delete(`/ruangan/${id}`)).data;
+  return await axiosInstance.delete(`/ruangan/${id}`);
 };
 
 // Additional ruangan-related services can be added here
