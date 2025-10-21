@@ -1,58 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getBarang, deleteBarang } from "../../services";
+import { useFetchBarang } from "../../hooks/barang/useFetchBarang";
+import { useDeleteBarang } from "../../hooks/barang/useDeleteBarang";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
 import RowActions from "../../components/RowActions";
 
 export default function Databarang() {
-  const [barang, setBarang] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const {
+    barang,
+    handleFetchBarang,
+    loading: fetchLoading,
+    error: fetchError,
+  } = useFetchBarang();
+  const { deleteBarangById } = useDeleteBarang();
   const [q, setQ] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // ✅ panggil getBarang untuk fetch data
-        const data = await getBarang();
-
-        // ✅ transform data sesuai kebutuhan
-        const newData = data.map((item, idx) => ({
-          id: item.id,
-          no: idx + 1,
-          name: item.nama_barang,
-          kode_inventaris: item.kode_inventaris,
-          jumlah: item.jumlah,
-          kondisi: item.kondisi,
-          ruangan: item.ruangan?.nama_ruangan || "-",
-          user: item.user?.username || "-", // ✅ ganti nama field
-        }));
-
-        // ✅ set state dengan data yang sudah di-transform
-        setBarang(newData);
-      } catch (err) {
-        // ✅ set error message jika fetch gagal
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    handleFetchBarang();
   }, [location.key]);
-
-  const removeById = async (id) => {
-    try {
-      await deleteBarang(id);
-    } catch (error) {
-      return console.log(error.message);
-    }
-  };
 
   // ✅ ubah toLowerCase untuk kode_inventaris agar tidak error
   const filtered = barang.filter(
@@ -78,16 +47,16 @@ export default function Databarang() {
         <RowActions
           basePath="/barang"
           id={row.id}
-          onDelete={() => removeById(row.id)}
+          onDelete={() => deleteBarangById(row.id)}
           getDeleteName={() => row.name} // ✅ gunakan row.name, bukan row.username
         />
       ),
     },
   ];
 
-  const emptyText = loading
+  const emptyText = fetchLoading
     ? "Memuat..."
-    : error
+    : fetchError
     ? `Gagal memuat data`
     : "Tidak ada data";
 

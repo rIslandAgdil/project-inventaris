@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { getRuangan, getRuanganById } from "../../services";
 
-export const useFetchDataRuangan = () => {
+export const useFetchRuangan = () => {
   const [ruangan, setRuangan] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

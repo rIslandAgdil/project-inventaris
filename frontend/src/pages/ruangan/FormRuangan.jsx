@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useFetchDataRuangan } from "../../hooks/ruangan/useFetchRuangan";
+import { useFetchRuangan } from "../../hooks/ruangan/useFetchRuangan";
 import { useCreateRuangan } from "../../hooks/ruangan/useCreateRuangan";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
@@ -13,7 +13,7 @@ export default function FormRuangan({ mode }) {
     ruangan,
     loading: fetchLoading,
     error: fetchError,
-  } = useFetchDataRuangan();
+  } = useFetchRuangan();
   const { handleCreateRuangan, loading: createLoading } = useCreateRuangan();
   const [form, setForm] = useState({
     nama_ruangan: ruangan.nama_ruangan ?? "",

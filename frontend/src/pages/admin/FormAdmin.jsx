@@ -1,15 +1,17 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { EyeOff, Eye } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { createUser, getUserById, updateUser } from "../../services";
-import Swal from "sweetalert2";
+import { useFetchUsers } from "../../hooks/user/useFetchUsers";
+import { useUpdateUser } from "../../hooks/user/useUpdateUser";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
 
-export default function FormAdmin({ mode = "view" }) {
+export default function FormAdmin({ mode }) {
   const { idUser } = useContext(AuthContext);
-  const [loading, setLoading] = useState(!!idUser);
+  const { id } = useParams();
+  const { handleFetchUserById, loading: loadingFetch, users } = useFetchUsers();
+  const { handleUpdateUser } = useUpdateUser();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
@@ -22,29 +24,24 @@ export default function FormAdmin({ mode = "view" }) {
     confirmPassword: "", // create and edit required
   });
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const data = await getUserById(idUser);
-      setForm({
-        username: data?.username ?? "",
-        email: data?.email ?? "",
-        password: "",
-        confirmPassword: "",
-      });
-    } catch (e) {
-      Swal.fire("Gagal", e?.response?.data?.error || e.message, "error");
-      navigate("/admin");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (mode == "view") {
+      handleFetchUserById(id);
     }
-  };
+    if (mode === "password" || mode === "edit") {
+      handleFetchUserById(idUser);
+    }
+  }, [mode, idUser]);
 
   useEffect(() => {
-    if (mode === "create" || mode === "password") return setLoading(false);
-
-    fetchData();
-  }, [mode]);
+    if (users) {
+      setForm((prev) => ({
+        ...prev,
+        username: users.username,
+        email: users.email,
+      }));
+    }
+  }, [users]);
 
   const readOnly = mode === "view";
   const titleMap = { create: "Tambah", edit: "Edit", view: "Detail" };
@@ -56,121 +53,7 @@ export default function FormAdmin({ mode = "view" }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (readOnly) return;
-
-    try {
-      setLoading(true);
-
-      // Change Password mode
-      if (mode === "password") {
-        if (form.password.trim() !== form.confirmPassword.trim()) {
-          setLoading(false);
-          return Swal.fire(
-            "Gagal!",
-            "Password dan konfirmasi password tidak cocok.",
-            "error"
-          );
-        }
-
-        // Minta konfirmasi password lama
-        const res = await Swal.fire({
-          title: "Konfirmasi Password Lama",
-          html: `<span class="text-sm text-slate-600">Masukkan password untuk melanjutkan.</span>`,
-          input: "password",
-          inputPlaceholder: "Password",
-          showCancelButton: true,
-          cancelButtonText: "Batal",
-          confirmButtonText: "Kirim",
-          confirmButtonColor: "#e11d48",
-          reverseButtons: true,
-          focusCancel: true,
-          preConfirm: async (value) => {
-            // Validasi input
-            if (!value || value.length < 4) {
-              Swal.showValidationMessage("Password minimal 4 karakter");
-              return false;
-            }
-
-            // Siapkan payload
-            const payload = {
-              password: value,
-              newPassword: form.confirmPassword.trim(),
-            };
-
-            // Kirim request ubah password
-            try {
-              await updateUser(idUser, payload);
-              await Swal.fire("Berhasil", "Password telah diubah", "success");
-            } catch (e) {
-              Swal.showValidationMessage(
-                e?.response?.data?.error || e.message || "Gagal menghapus."
-              );
-            }
-            navigate("/admin");
-            return false;
-          },
-        });
-        if (!res.isConfirmed) return;
-      }
-
-      // Edit Profile mode
-      if (mode === "edit" && idUser) {
-        const payload = {
-          username: form.username,
-          email: form.email,
-        };
-
-        try {
-          const { username } = await updateUser(idUser, payload);
-
-          localStorage.setItem("username", JSON.stringify(username));
-        } catch (error) {
-          return Swal.fire(
-            "Gagal",
-            error?.response?.data?.error || error.message,
-            "error"
-          );
-        }
-      }
-
-      // Create mode
-      if (mode === "create") {
-        // Validasi password
-        if (form.password.trim() !== form.confirmPassword.trim()) {
-          setLoading(false);
-          return Swal.fire(
-            "Gagal!",
-            "Password dan konfirmasi password tidak cocok.",
-            "error"
-          );
-        }
-
-        // Siapkan payload
-        const payload = {
-          username: form.username,
-          email: form.email,
-          password: form.password.trim(),
-        };
-
-        // Kirim request pembuatan admin baru
-        try {
-          await createUser(payload);
-        } catch (error) {
-          return Swal.fire(
-            "Gagal",
-            error?.response?.data?.error || error.message,
-            "error"
-          );
-        }
-      }
-
-      await Swal.fire("Sukses", "Data admin berhasil disimpan.", "success");
-      navigate("/admin");
-    } catch (e) {
-      Swal.fire("Gagal", e?.response?.data?.error || e.message, "error");
-    } finally {
-      setLoading(false);
-    }
+    handleUpdateUser(mode, idUser, form);
   };
 
   return (
@@ -202,7 +85,7 @@ export default function FormAdmin({ mode = "view" }) {
             </p>
           </div>
 
-          {loading ? (
+          {loadingFetch ? (
             <div className="px-6 py-6">Loading…</div>
           ) : (
             <form onSubmit={handleSubmit} className="px-6 py-6 grid gap-4">
@@ -308,8 +191,12 @@ export default function FormAdmin({ mode = "view" }) {
                   {readOnly ? "Kembali" : "Batal"}
                 </Button>
                 {!readOnly && (
-                  <Button type="submit" variant="primary" disabled={loading}>
-                    {loading ? "Menyimpan..." : "Simpan"}
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={loadingFetch}
+                  >
+                    {loadingFetch ? "Menyimpan..." : "Simpan"}
                   </Button>
                 )}
               </div>

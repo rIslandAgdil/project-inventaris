@@ -9,7 +9,7 @@ export const getUserById = async (id) => {
 };
 
 export const createUser = async (userData) => {
-  return (await axiosInstance.post("/users", userData)).data;
+  return await axiosInstance.post("/users", userData);
 };
 
 export const updateUser = async (id, userData) => {
@@ -17,9 +17,9 @@ export const updateUser = async (id, userData) => {
 };
 
 export const deleteUser = async (id, confirmPassword) => {
-  return (
-    await axiosInstance.delete(`/users/${id}`, { data: { confirmPassword } })
-  ).data;
+  return await axiosInstance.delete(`/users/${id}`, {
+    data: { confirmPassword },
+  });
 };
 
 // Additional user-related services can be added here
