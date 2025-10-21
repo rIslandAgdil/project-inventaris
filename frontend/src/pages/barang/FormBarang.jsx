@@ -1,77 +1,52 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState, useMemo, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import Swal from "sweetalert2";
-import {
-  getRuangan,
-  getBarangById,
-  createBarang,
-  updateBarang,
-} from "../../services";
+import { useCreateBarang } from "../../hooks/barang/useCreateBarang";
+import { useFetchBarang } from "../../hooks/barang/useFetchBarang";
+import { useFetchRuangan } from "../../hooks/ruangan/useFetchRuangan";
 import PageShell from "../../components/PageShell";
 import Button from "../../components/Button";
 
-export default function FormBarang() {
+export default function FormBarang({ mode }) {
   const { id } = useParams();
   const { username, idUser } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation();
-  const [ruangan, setRuangan] = useState([]);
+  const { handleSubmitBarang } = useCreateBarang();
+  const { handleFetchBarangById, barang } = useFetchBarang();
+  const { handleFetchRuangan, ruangan } = useFetchRuangan();
   const [form, setForm] = useState({
-    nama_barang: "",
-    kode_inventaris: "",
-    jumlah: "",
-    kondisi: "Baik",
-    ruanganId: 1,
+    nama_barang: barang.nama_barang ?? "",
+    kode_inventaris: barang.kode_inventaris ?? "",
+    jumlah: barang.jumlah ?? "",
+    kondisi: barang.kondisi ?? "Baik",
+    ruanganId: barang.ruanganId ?? 1,
     userId: idUser,
   });
 
-  const mode = useMemo(
-    () =>
-      location.pathname.includes("/view/") ? "view" : id ? "edit" : "create",
-    [id, location.pathname]
-  );
   const [loading, setLoading] = useState(!!id);
   const readOnly = mode === "view";
   const titleMap = { create: "Tambah", edit: "Edit", view: "Detail" };
 
   useEffect(() => {
     if (mode !== "create") {
-      fetchDataBarang(id);
+      handleFetchBarangById(id);
     }
-    fetchDataRuangan();
-  }, []);
+    handleFetchRuangan();
+  }, [id, mode]);
 
-  // AMBIL DATA BARANG
-  const fetchDataBarang = async (id) => {
-    setLoading(true);
-    try {
-      const data = await getBarangById(id);
+  useEffect(() => {
+    if (barang.nama_barang) {
       setForm({
-        nama_barang: data.nama_barang,
-        kode_inventaris: data.kode_inventaris,
-        jumlah: data.jumlah,
-        kondisi: data.kondisi,
-        ruanganId: data.ruanganId,
-        userId: data.userId,
+        nama_barang: barang.nama_barang,
+        kode_inventaris: barang.kode_inventaris,
+        jumlah: barang.jumlah,
+        kondisi: barang.kondisi,
+        ruanganId: barang.ruanganId,
+        userId: idUser,
       });
-    } catch (error) {
-      console.log(error.message);
     }
     setLoading(false);
-  };
-
-  // AMBIL DATA RUANGAN
-  const fetchDataRuangan = async () => {
-    setLoading(true);
-    try {
-      const data = await getRuangan();
-      setRuangan(data);
-    } catch (error) {
-      console.log(error.message);
-    }
-    setLoading(false);
-  };
+  }, [barang]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,45 +62,7 @@ export default function FormBarang() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    //CEK JIKA DATA BELUM LENGKAP
-    if (
-      !form.nama_barang.trim() ||
-      !form.kode_inventaris.trim() ||
-      !form.jumlah
-    ) {
-      Swal.fire("Validasi", "Data belum lengkap!", "warning");
-      return;
-    }
-
-    // JIKA DATA LENGKAP
-    Swal.fire({
-      title: "Simpan Data?",
-      text: `Pastikan data yang anda input sudah benar!`,
-      icon: "question",
-      showCancelButton: true,
-      cancelButtonText: "Batal",
-      confirmButtonText: "Simpan",
-      reverseButtons: true,
-      focusCancel: true,
-      confirmButtonColor: "#e11d48",
-    }).then(async (res) => {
-      if (res.isConfirmed) {
-        try {
-          setLoading(true);
-
-          mode === "create"
-            ? await createBarang(form)
-            : await updateBarang(id, form);
-
-          Swal.fire("Sukses", `Data berhasil disimpan`, "success").then(() =>
-            navigate("/barang")
-          );
-        } catch (error) {
-          console.log(error.message);
-        }
-        setLoading(false);
-      }
-    });
+    handleSubmitBarang(form, mode, id);
   };
 
   return (

@@ -9,15 +9,15 @@ export const getBarangById = async (id) => {
 };
 
 export const createBarang = async (barangData) => {
-  return (await axiosInstance.post("/barang", barangData)).data;
+  return await axiosInstance.post("/barang", barangData);
 };
 
 export const updateBarang = async (id, barangData) => {
-  return (await axiosInstance.put(`/barang/${id}`, barangData)).data;
+  return await axiosInstance.put(`/barang/${id}`, barangData);
 };
 
 export const deleteBarang = async (id) => {
-  return (await axiosInstance.delete(`/barang/${id}`)).data;
+  return await axiosInstance.delete(`/barang/${id}`);
 };
 
 // Additional barang-related services can be added here

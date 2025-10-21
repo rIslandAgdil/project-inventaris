@@ -76,7 +76,7 @@ const login = async (req, res) => {
     };
     const token = jwt.sign(payload, SECRET_KEY);
 
-    return res.json({
+    return res.status(200).json({
       message: "Berhasil Login",
       token,
       idUser: user.id,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useFetchDataRuangan } from "../../hooks/ruangan/useFetchRuangan";
+import { useFetchRuangan } from "../../hooks/ruangan/useFetchRuangan";
 import { useDeleteRuangan } from "../../hooks/ruangan/useDeleteRuangan";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
@@ -16,7 +16,7 @@ export default function DataRuangan() {
     loading: loadingFetch,
     error: errorFetch,
     handleFetchRuangan,
-  } = useFetchDataRuangan();
+  } = useFetchRuangan();
   const { handleDeleteRuangan } = useDeleteRuangan();
 
   useEffect(() => {

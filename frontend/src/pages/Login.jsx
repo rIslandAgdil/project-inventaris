@@ -23,6 +23,7 @@ function Login() {
 
     try {
       const { token, username, idUser } = await login(formData);
+      console.log(token, username, idUser);
 
       // SIMPAN DATA LOGIN DI LOCALSTORAGE
       // biar pas refresh halaman, data login ga ilang

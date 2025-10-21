@@ -1,17 +1,20 @@
 import { useState } from "react";
-import { createRuangan, updateRuangan } from "../../services";
-import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { createBarang, updateBarang } from "../../services";
+import { useNavigate } from "react-router-dom";
 
-export const useCreateRuangan = () => {
+export const useCreateBarang = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleCreateRuangan = async (id = null, mode, payload) => {
-    // JIKA DATA BELUM LENGKAP
-    if (!payload.nama_ruangan.trim()) {
-      Swal.fire("Validasi", "Nama ruangan wajib diisi", "warning");
-      return;
+  const handleSubmitBarang = async (payload, mode, id = null) => {
+    //CEK JIKA DATA BELUM LENGKAP
+    if (
+      !payload.nama_barang.trim() ||
+      !payload.kode_inventaris.trim() ||
+      !payload.jumlah
+    ) {
+      return Swal.fire("Validasi", "Data belum lengkap!", "warning");
     }
 
     // JIKA DATA LENGKAP
@@ -31,11 +34,11 @@ export const useCreateRuangan = () => {
           setLoading(true);
 
           mode === "create"
-            ? await createRuangan(payload)
-            : await updateRuangan(id, payload);
+            ? await createBarang(payload)
+            : await updateBarang(id, payload);
 
           Swal.fire("Sukses", `Data berhasil disimpan`, "success").then(() =>
-            navigate("/ruangan")
+            navigate("/barang")
           );
         } catch (error) {
           Swal.fire("Gagal", error.message, "error");
@@ -46,5 +49,5 @@ export const useCreateRuangan = () => {
     });
   };
 
-  return { handleCreateRuangan, loading };
+  return { loading, handleSubmitBarang };
 };
