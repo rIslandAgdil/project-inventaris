@@ -39,7 +39,7 @@ exports.getBarang = async (req, res) => {
 };
 
 //read barang by id - buat coba aja sih - bagusnya kembangkan ke fitur search
-exports.getBarangBy = async (req, res) => {
+exports.getBarangById = async (req, res) => {
   try {
     const { id } = req.params;
     const barang = await prisma.barang.findUnique({

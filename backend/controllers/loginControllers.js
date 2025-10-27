@@ -76,9 +76,15 @@ const login = async (req, res) => {
     };
     const token = jwt.sign(payload, SECRET_KEY);
 
+    // kirim token ke cookie client
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, // true jika dalam production
+      sameSite: "lax",
+    });
+
     return res.status(200).json({
       message: "Berhasil Login",
-      token,
       idUser: user.id,
       username: user.username,
     });
