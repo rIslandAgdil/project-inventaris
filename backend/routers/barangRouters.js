@@ -1,11 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const barangController = require('../controllers/barangControllers');
+const createProtectedRouter = require("../middlewares/protectedRoute");
+const router = createProtectedRouter();
+const {
+  createBarang,
+  getBarang,
+  getBarangById,
+  updateBarang,
+  deleteBarang,
+} = require("../controllers/barangControllers");
 
-router.post("/", barangController.createBarang);
-router.get("/", barangController.getBarang);
-router.get("/:id", barangController.getBarangBy);
-router.put("/:id", barangController.updateBarang);
-router.delete("/:id", barangController.deleteBarang);
+router.post("/", createBarang);
+router.get("/", getBarang);
+router.get("/:id", getBarangById);
+router.put("/:id", updateBarang);
+router.delete("/:id", deleteBarang);
 
 module.exports = router;

@@ -10,7 +10,7 @@ export const useFetchBarang = () => {
     setLoading(true);
     try {
       // ✅ panggil getBarang untuk fetch data
-      const data = await getBarang();
+      const { data } = await getBarang();
 
       // ✅ transform data sesuai kebutuhan
       const newData = data.map((item, idx) => ({
@@ -37,7 +37,7 @@ export const useFetchBarang = () => {
   const handleFetchBarangById = async (id) => {
     setLoading(true);
     try {
-      const data = await getBarangById(id);
+      const { data } = await getBarangById(id);
       setBarang({
         nama_barang: data.nama_barang,
         kode_inventaris: data.kode_inventaris,

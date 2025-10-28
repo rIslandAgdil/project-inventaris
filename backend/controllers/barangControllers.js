@@ -1,55 +1,46 @@
-//require config database
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const barangRepo = require("../repositories/barangRepository");
+const { sendSuccess, sendError } = require("../middlewares/response");
 
-//tambahkan barang
+// tambahkan barang
 exports.createBarang = async (req, res) => {
   try {
     const { nama_barang, kode_inventaris, jumlah, kondisi, ruanganId, userId } =
       req.body;
-    const barang = await prisma.barang.create({
-      data: {
-        nama_barang,
-        kode_inventaris,
-        jumlah: Number(jumlah),
-        kondisi,
-        ruanganId: Number(ruanganId),
-        userId: Number(userId),
-      },
-    });
-    res.json({ message: "Barang berhasil ditambahkan", barang });
+    const payload = {
+      nama_barang,
+      kode_inventaris,
+      jumlah: Number(jumlah),
+      kondisi,
+      ruanganId: Number(ruanganId),
+      userId: Number(userId),
+    };
+
+    const barang = await barangRepo.createBarang(payload);
+    return sendSuccess(res, "Barang berhasil ditambahkan", 201, barang);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendError(res, "Gagal menambah barang", 500, error);
   }
 };
 
 //read - semua barang
 exports.getBarang = async (req, res) => {
   try {
-    const barang = await prisma.barang.findMany({
-      include: {
-        ruangan: true, // menampilkan array barang di setiap ruangan
-        user: true,
-      },
-    }); //{ include: { ruangan: true } }
-    res.json(barang);
+    const barang = await barangRepo.getAllBarang();
+    return sendSuccess(res, "Daftar barang", 200, barang);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendError(res, "Gagal mengambil data barang", 500, error);
   }
 };
 
 //read barang by id - buat coba aja sih - bagusnya kembangkan ke fitur search
-exports.getBarangBy = async (req, res) => {
+exports.getBarangById = async (req, res) => {
   try {
     const { id } = req.params;
-    const barang = await prisma.barang.findUnique({
-      where: { id: Number(id) },
-    });
-    if (!barang)
-      return res.status(404).json({ message: "Barang tidak ditemukan" });
-    res.json(barang);
+    const barang = await barangRepo.getBarangById(Number(id));
+    if (!barang) return sendError(res, "Barang tidak ditemukan", 404);
+    return sendSuccess(res, "Detail barang", 200, barang);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendError(res, "Gagal mengambil detail barang", 500, error);
   }
 };
 
@@ -58,28 +49,27 @@ exports.updateBarang = async (req, res) => {
     const { id } = req.params;
     const { nama_barang, kode_inventaris, jumlah, kondisi, ruanganId } =
       req.body;
-    const barang = await prisma.barang.update({
-      where: { id: Number(id) },
-      data: {
-        nama_barang,
-        kode_inventaris,
-        jumlah: Number(jumlah),
-        kondisi,
-        ruanganId: Number(ruanganId),
-      },
-    });
-    res.json({ message: "Data Barang Berhasil diupdate", barang });
+    const payload = {
+      nama_barang,
+      kode_inventaris,
+      jumlah: Number(jumlah),
+      kondisi,
+      ruanganId: Number(ruanganId),
+    };
+
+    const barang = await barangRepo.updateBarang(Number(id), payload);
+    return sendSuccess(res, "Data Barang Berhasil diupdate", 200, barang);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendError(res, "Gagal update barang", 500, error);
   }
 };
 
 exports.deleteBarang = async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.barang.delete({ where: { id: Number(id) } });
-    res.json({ message: "Barang Berhasil Dihapus" });
+    await barangRepo.deleteBarang(Number(id));
+    return sendSuccess(res, "Barang Berhasil Dihapus", 200);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendError(res, "Gagal menghapus barang", 500, error);
   }
 };

@@ -1,18 +1,14 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
+const userRepo = require("../repositories/userRepository");
+const { sendSuccess, sendError } = require("../middlewares/response");
 
 exports.getAllUsers = async (_req, res) => {
   try {
     // ambil semua user dari database
-    const users = await prisma.user.findMany({ orderBy: { id: "asc" } });
-
-    // menghilangkan field password dari response
-    // sebelum mengirim ke client
+    const users = await userRepo.findAllUsers();
+    // menghilangkan field password dari response sebelum mengirim ke client
     const sanitized = users.map(({ password, ...data }) => data);
-
-    // mengirim data user ke client
-    res.json(sanitized);
+    return sendSuccess(res, "Daftar user", 200, sanitized);
   } catch (error) {
     // Generic server error
     res.status(500).json({
@@ -25,21 +21,15 @@ exports.getAllUsers = async (_req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     const id = Number(req.params.id);
-
     // mencari user ke database berdasarkan id
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await userRepo.findUserById(id);
 
     // jika user tidak ada
-    if (!user) return res.status(404).json({ message: "User tidak ditemukan" });
-
-    // mengirim data user ke client
-    res.status(200).json(user);
+    if (!user) return sendError(res, "User tidak ditemukan", 404);
+    return sendSuccess(res, "Detail user", 200, user);
   } catch (error) {
     // Generic server error
-    res.status(500).json({
-      message: "Terjadi kesalahan pada server.",
-      detail: error.message,
-    });
+    return sendError(res, "Gagal mengambil data user", 500, error);
   }
 };
 
@@ -47,18 +37,18 @@ exports.createUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      return res
-        .status(400)
-        .json({ error: "username, email, password wajib diisi" });
+      return sendError(res, "username, email, password wajib diisi", 400);
     }
     const hashed = await bcrypt.hash(password, 10);
-    const created = await prisma.user.create({
-      data: { username, email, password: hashed },
+    const created = await userRepo.createUser({
+      username,
+      email,
+      password: hashed,
     });
     const { password: _pw, ...u } = created;
-    res.status(201).json({ message: "User dibuat", data: u });
+    return sendSuccess(res, "User dibuat", 201, u);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendError(res, "Gagal membuat user", 500, error);
   }
 };
 
@@ -67,9 +57,8 @@ exports.updateUser = async (req, res) => {
     const id = Number(req.params.id);
     const { username, email, password, newPassword } = req.body;
 
-    const current = await prisma.user.findUnique({ where: { id } });
-    if (!current)
-      return res.status(404).json({ error: "User tidak ditemukan" });
+    const current = await userRepo.findUserById(id);
+    if (!current) return sendError(res, "User tidak ditemukan", 404);
 
     //jika password ada, berarti user mau ganti password
     if (password) {
@@ -77,40 +66,29 @@ exports.updateUser = async (req, res) => {
       const ok = await bcrypt.compare(password, current.password);
 
       // jika tidak sesuai
-      if (!ok)
-        return res.status(401).json({ error: "Password konfirmasi salah." });
+      if (!ok) return sendError(res, "Password konfirmasi salah.", 401);
 
       // jika sesuai, lanjut update password baru
       const hashed = await bcrypt.hash(newPassword, 10);
       try {
-        await prisma.user.update({
-          where: { id },
-          data: { password: hashed },
-        });
-
-        return res.status(200).json({
-          message: "Password diperbarui",
-        });
+        await userRepo.updateUser(id, { password: hashed });
+        return sendSuccess(res, "Password diperbarui", 200);
       } catch (error) {
-        return res.status(500).json({ error: error.message });
+        return sendError(res, "Gagal update password", 500, error);
       }
     }
 
     // jika tidak ada password, berarti user hanya mau update username/email
     try {
-      const updated = await prisma.user.update({
-        where: { id },
-        data: { username, email },
+      const updated = await userRepo.updateUser(id, { username, email });
+      return sendSuccess(res, "User diperbarui", 200, {
+        username: updated.username,
       });
-
-      res
-        .status(200)
-        .json({ message: "User diperbarui", username: updated.username });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return sendError(res, "Gagal update user", 500, error);
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return sendError(res, "Gagal update user", 500, error);
   }
 };
 
@@ -120,38 +98,28 @@ exports.deleteUser = async (req, res) => {
     const { confirmPassword } = req.body;
 
     // mencari user ke database berdasarkan id
-    const current = await prisma.user.findUnique({ where: { id } });
+    const current = await userRepo.findUserById(id);
 
     // jika user tidak ada
-    if (!current)
-      return res.status(404).json({ error: "User tidak ditemukan" });
+    if (!current) return sendError(res, "User tidak ditemukan", 404);
 
     // jika password konfirmasi tidak dikirim
     if (!confirmPassword) {
-      return res
-        .status(400)
-        .json({ error: "Password konfirmasi wajib diisi." });
+      return sendError(res, "Password konfirmasi wajib diisi.", 400);
     }
 
     // pastikan password konfirmasi benar
     const ok = await bcrypt.compare(confirmPassword, current.password);
-    if (!ok)
-      return res.status(401).json({ error: "Password konfirmasi salah." });
+    if (!ok) return sendError(res, "Password konfirmasi salah.", 401);
 
     // hapus user
-    await prisma.user.delete({ where: { id } });
-    res.status(200).json({ message: "User dihapus" });
+    await userRepo.deleteUser(id);
+    return sendSuccess(res, "User dihapus", 200);
   } catch (error) {
     // Handle foreign key constraint error
     if (String(error?.code) === "P2003") {
-      return res
-        .status(409)
-        .json({ error: "User masih direferensikan data lain." });
+      return sendError(res, "User masih direferensikan data lain.", 409);
     }
-    // Generic server error
-    res.status(500).json({
-      message: "Terjadi kesalahan pada server.",
-      detail: error.message,
-    });
+    return sendError(res, "Gagal menghapus user", 500, error);
   }
 };

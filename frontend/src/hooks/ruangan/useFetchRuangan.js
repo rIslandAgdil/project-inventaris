@@ -10,7 +10,7 @@ export const useFetchRuangan = () => {
     setLoading(true);
     try {
       // ✅ panggil getRuangan untuk fetch data
-      const data = await getRuangan();
+      const { data } = await getRuangan();
 
       // ✅ transform data sesuai kebutuhan
       // tambahkan nomor urut pada setiap item
@@ -29,7 +29,7 @@ export const useFetchRuangan = () => {
     setLoading(true);
     try {
       // MENGAMBIL DATA RUANGAN BERDASARKAN ID
-      const data = await getRuanganById(id);
+      const { data } = await getRuanganById(id);
 
       // MENGISI DATA KE FORM
       setRuangan(data);
