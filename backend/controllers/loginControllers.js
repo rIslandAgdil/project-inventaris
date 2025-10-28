@@ -56,7 +56,6 @@ const login = async (req, res) => {
       sameSite: "lax",
     });
 
-    return res;
     return sendSuccess(res, "Berhasil Login", 200, {
       idUser: user.id,
       username: user.username,
