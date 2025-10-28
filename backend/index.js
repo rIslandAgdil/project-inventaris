@@ -22,6 +22,7 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
+  credentials: true,
   optionsSuccessStatus: 200, // Untuk memastikan response preflight OPTIONS sukses di browser lama
 };
 

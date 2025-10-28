@@ -11,7 +11,7 @@
  * @param {*} [data=null] - Data yang akan dikirim ke client
  * @returns {Object} Express response object
  */
-const sendSuccess = (res, message, statusCode = 200, data = null) => {
+const sendSuccess = (res, message, statusCode = 200, responseData = null) => {
   if (!res || !res.status || !res.json) {
     throw new Error("Parameter res tidak valid");
   }
@@ -21,12 +21,15 @@ const sendSuccess = (res, message, statusCode = 200, data = null) => {
   }
 
   // Hapus data jika null/undefined, tapi pertahankan array kosong atau objek kosong
-  const responseData = data === null || data === undefined ? undefined : data;
+  const data =
+    responseData === null || responseData === undefined
+      ? undefined
+      : responseData;
 
   return res.status(statusCode).json({
     success: true,
     message,
-    ...(responseData !== undefined && { data: responseData }),
+    ...(data !== undefined && { data }),
   });
 };
 

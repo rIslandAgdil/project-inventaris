@@ -26,9 +26,9 @@ export default function Dashboard() {
       ]);
 
       // Update state with fetched data
-      setDataBarang(jumlahBarang.length);
-      setDataRuangan(jumlahRuangan.length);
-      setDataPengguna(jumlahPengguna.length);
+      setDataBarang(jumlahBarang.data.length);
+      setDataRuangan(jumlahRuangan.data.length);
+      setDataPengguna(jumlahPengguna.data.length);
     } catch (error) {
       console.error("Error fetching data:", error);
       // Tampilkan pesan error kepada pengguna

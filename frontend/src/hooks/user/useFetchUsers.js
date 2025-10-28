@@ -11,7 +11,8 @@ export const useFetchUsers = () => {
   const handleFetchUsers = async () => {
     setLoading(true);
     try {
-      const data = await getUsers();
+      const { data } = await getUsers();
+
       const newData = data.map((item, idx) => ({ ...item, no: idx + 1 }));
 
       setUsers(newData);
@@ -25,7 +26,7 @@ export const useFetchUsers = () => {
   const handleFetchUserById = async (id) => {
     setLoading(true);
     try {
-      const data = await getUserById(id);
+      const { data } = await getUserById(id);
       setUsers({
         username: data?.username ?? "",
         email: data?.email ?? "",

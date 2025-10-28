@@ -22,17 +22,16 @@ function Login() {
     setMessage("");
 
     try {
-      const { token, username, idUser } = await login(formData);
-      console.log(token, username, idUser);
+      const { username, idUser } = await login(formData);
+      console.log(username, idUser);
 
       // SIMPAN DATA LOGIN DI LOCALSTORAGE
       // biar pas refresh halaman, data login ga ilang
       // dan bisa diakses di context
       // (tapi kalo mau lebih aman, pake httpOnly cookie aja)
-      localStorage.setItem("token", JSON.stringify(token));
       localStorage.setItem("username", JSON.stringify(username));
       localStorage.setItem("idUser", JSON.stringify(idUser));
-      setAuth({ token, username, idUser });
+      setAuth({ username, idUser });
 
       navigate("/");
     } catch (error) {
