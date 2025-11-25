@@ -47,13 +47,14 @@ const login = async (req, res) => {
 
     // jika cocok, buat token jwt
     const payload = { id: user.id, username: user.username, email: user.email };
-    const token = jwt.sign(payload, SECRET_KEY);
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
 
     // kirim token ke cookie client
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      // expires: new Date(Date.now() + 1 * 60 * 60 * 1000),
     });
 
     return sendSuccess(res, "Berhasil Login", 200, {

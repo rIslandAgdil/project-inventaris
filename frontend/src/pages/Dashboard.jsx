@@ -1,42 +1,28 @@
 import PageShell from "../components/PageShell";
 import StatCard from "../components/StatCard";
-import { useEffect, useState } from "react";
 import { getUsers, getBarang, getRuangan } from "../services";
 import ActivityList from "../components/ActivityList";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Dashboard() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [dataBarang, setDataBarang] = useState();
-  const [dataRuangan, setDataRuangan] = useState();
-  const [dataPengguna, setDataPengguna] = useState();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Query data barang
+  const {data: dataBarang, isLoading: isLoadingBarang, isError: isErrorBarang, error: errorBarang} = useQuery({
+    queryKey: ["barang"],
+    queryFn: getBarang,
+  });
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // Fetch data from backend
-      const [jumlahBarang, jumlahRuangan, jumlahPengguna] = await Promise.all([
-        getBarang(),
-        getRuangan(),
-        getUsers(),
-      ]);
+  // Query data ruangan
+  const {data: dataRuangan, isLoading: isLoadingRuangan, isError: isErrorRuangan, error: errorRuangan} = useQuery({
+    queryKey: ["ruangan"],
+    queryFn: getRuangan,
+  });
 
-      // Update state with fetched data
-      setDataBarang(jumlahBarang.data.length);
-      setDataRuangan(jumlahRuangan.data.length);
-      setDataPengguna(jumlahPengguna.data.length);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      // Tampilkan pesan error kepada pengguna
-      setError("Gagal memuat data. Silakan coba lagi.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Query data pengguna
+  const {data: dataPengguna, isLoading: isLoadingPengguna, isError: isErrorPengguna, error: errorPengguna} = useQuery({
+    queryKey: ["pengguna"],
+    queryFn: getUsers,
+  });
 
   return (
     <PageShell
@@ -51,18 +37,18 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {loading ? (
+      {isLoadingBarang || isLoadingRuangan || isLoadingPengguna ? (
         //jika loading tampilkan loading
         <p className="text-center animate-pulse">Loading...</p>
-      ) : error ? (
+      ) : isErrorBarang || isErrorRuangan || isErrorPengguna ? (
         //jika error tampilkan pesan error
-        <p className="text-center text-red-500">{error}</p>
+        <p className="text-center text-red-500">{errorBarang?.message || errorRuangan?.message || errorPengguna?.message}</p>
       ) : (
         //jika data ada tampilkan data
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard title="Total Barang" value={dataBarang} />
-          <StatCard title="Total Ruangan" value={dataRuangan} />
-          <StatCard title="Pengguna Aktif" value={dataPengguna} />
+          <StatCard title="Total Barang" value={dataBarang.data.length} />
+          <StatCard title="Total Ruangan" value={dataRuangan.data.length} />
+          <StatCard title="Pengguna Aktif" value={dataPengguna.data.length} />
         </div>
       )}
 

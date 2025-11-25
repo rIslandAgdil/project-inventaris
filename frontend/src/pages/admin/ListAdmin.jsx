@@ -1,35 +1,39 @@
-// src/pages/admin/ListAdmin.jsx
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
 import RowActions from "../../components/RowActions";
-import { useFetchUsers } from "../../hooks/user/useFetchUsers";
-import { useDeleteUser } from "../../hooks/user/useDeleteUser";
+import { useDeleteUser, useGetUsers } from "../../hooks/userQueries";
 
 export default function ListAdmin() {
   const [search, setSearch] = useState("");
-  const { handleFetchUsers, loading, error, users } = useFetchUsers();
-  const { handleDeleteUser } = useDeleteUser();
+  const { data, isLoading, error } = useGetUsers();
+  const deleteUser = useDeleteUser();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    handleFetchUsers();
-  }, [location.key]);
 
   const filtered = useMemo(() => {
-    const s = search.trim().toLowerCase();
-    const src = Array.isArray(users) ? users : [];
-    if (!s) return src;
-    return src.filter(
+    const users = data?.data || [];
+
+    // pastikan user ada sebelum mapping data
+    if (isLoading || !users || users.length === 0) return [];
+
+    const mappedUsers = users.map((user, idx) => ({
+      no: idx + 1,
+      ...user,
+    }));
+
+    // jika tidak ada search, kembalikan semua data
+    if (!search.trim()) return mappedUsers;
+
+    // filter berdasarkan search query
+    return mappedUsers.filter(
       (r) =>
-        String(r.no).includes(s) ||
-        (r?.username ?? "").toLowerCase().includes(s) ||
-        (r?.email ?? "").toLowerCase().includes(s)
+        String(r.no).includes(search) ||
+        (r?.username ?? "").toLowerCase().includes(search) ||
+        (r?.email ?? "").toLowerCase().includes(search)
     );
-  }, [users, search]);
+  }, [data, search, isLoading]);
 
   const columns = useMemo(
     () => [
@@ -44,7 +48,7 @@ export default function ListAdmin() {
             basePath="/admin"
             id={row.id}
             requireDeletePassword // ← hanya di Users
-            onDelete={handleDeleteUser}
+            onDelete={() => deleteUser.mutate(row.id)}
             hideEdit
             getDeleteName={() => row.username}
             labels={{ view: "Detail", edit: "Ubah", delete: "Hapus" }}
@@ -55,7 +59,7 @@ export default function ListAdmin() {
     []
   );
 
-  const emptyText = loading
+  const emptyText = isLoading
     ? "Memuat..."
     : error
     ? `Gagal memuat data`

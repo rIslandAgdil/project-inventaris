@@ -1,32 +1,36 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useFetchRuangan } from "../../hooks/ruangan/useFetchRuangan";
-import { useDeleteRuangan } from "../../hooks/ruangan/useDeleteRuangan";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
 import RowActions from "../../components/RowActions";
+import { useDeleteRuangan, useGetRuangan } from "../../hooks/ruanganQueries";
 
 export default function DataRuangan() {
-  const [q, setQ] = useState("");
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
-  const {
-    ruangan,
-    loading: loadingFetch,
-    error: errorFetch,
-    handleFetchRuangan,
-  } = useFetchRuangan();
-  const { handleDeleteRuangan } = useDeleteRuangan();
+  const { data, isLoading, error } = useGetRuangan();
+  const deleteRuangan = useDeleteRuangan();
 
-  useEffect(() => {
-    handleFetchRuangan();
-  }, [location.key]);
+  const filtered = useMemo(() => {
+    const ruangan = data?.data || [];
 
-  const filtered = ruangan.filter((p) => {
-    const s = q.toLowerCase();
-    return p.nama_ruangan.toLowerCase().includes(s);
-  });
+    // pastikan ruangan ada sebelum mapping data
+    if (isLoading || !ruangan || ruangan.length === 0) return [];
+
+    const mappedRuangan = ruangan.map((item, idx) => ({
+      no: idx + 1,
+      ...item,
+    }));
+
+    // jika tidak ada search, kembalikan semua data
+    if (!search.trim()) return mappedRuangan;
+
+    // filter berdasarkan search query
+    return mappedRuangan.filter((r) =>
+      r?.nama_ruangan.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [data, search, isLoading]);
 
   const columns = [
     { header: "No.", accessor: "no", hideBelow: "md" },
@@ -38,16 +42,16 @@ export default function DataRuangan() {
         <RowActions
           basePath="/ruangan"
           id={row.id}
-          onDelete={() => handleDeleteRuangan(row.id)}
+          onDelete={() => deleteRuangan.mutate(row.id)}
           getDeleteName={() => row.username}
         />
       ),
     },
   ];
 
-  const emptyText = loadingFetch
+  const emptyText = isLoading
     ? "Memuat..."
-    : errorFetch
+    : error
     ? `Gagal memuat data`
     : "Tidak ada data";
 
@@ -58,8 +62,8 @@ export default function DataRuangan() {
         <div className="flex items-center gap-2">
           <input
             type="text"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari no/ruangan/barang"
             className="border rounded-md px-3 py-2 text-sm"
           />

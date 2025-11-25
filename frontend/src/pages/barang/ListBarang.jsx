@@ -1,36 +1,50 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useFetchBarang } from "../../hooks/barang/useFetchBarang";
-import { useDeleteBarang } from "../../hooks/barang/useDeleteBarang";
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useGetBarang, useDeleteBarang } from "../../hooks/barangQueries";
 import PageShell from "../../components/PageShell";
 import Table from "../../components/Table";
 import Button from "../../components/Button";
 import RowActions from "../../components/RowActions";
 
 export default function Databarang() {
-  const {
-    barang,
-    handleFetchBarang,
-    loading: fetchLoading,
-    error: fetchError,
-  } = useFetchBarang();
-  const { deleteBarangById } = useDeleteBarang();
   const [q, setQ] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
+  const deleteBarang = useDeleteBarang();
+  const {
+    data: responseData,
+    isLoading: fetchLoading,
+    error: fetchError,
+  } = useGetBarang();
 
-  useEffect(() => {
-    handleFetchBarang();
-  }, [location.key]);
+  // Lakukan transformasi dan filter data
+  const transformedBarang = useMemo(() => {
+    const barang = responseData?.data || [];
 
-  // ✅ ubah toLowerCase untuk kode_inventaris agar tidak error
-  const filtered = barang.filter(
-    (p) =>
-      p.name.toLowerCase().includes(q.toLowerCase()) ||
-      p.kode_inventaris.toString().toLowerCase().includes(q.toLowerCase()) ||
-      p.ruangan.toLowerCase().includes(q.toLowerCase()) ||
-      p.user.toLowerCase().includes(q.toLowerCase())
-  );
+    // Pastikan data ada sebelum melakukan map
+    if (fetchLoading || !barang || barang.length === 0) return [];
+
+    const mapped = barang.map((item, idx) => ({
+      id: item.id,
+      no: idx + 1,
+      name: item.nama_barang,
+      kode_inventaris: item.kode_inventaris,
+      jumlah: item.jumlah,
+      kondisi: item.kondisi,
+      ruangan: item.ruangan?.nama_ruangan || "-",
+      user: item.user?.username || "-",
+    }));
+
+    // Filter berdasarkan search query
+    if (!q.trim()) return mapped;
+
+    return mapped.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q.toLowerCase()) ||
+        p.kode_inventaris.toString().toLowerCase().includes(q.toLowerCase()) ||
+        p.ruangan.toLowerCase().includes(q.toLowerCase()) ||
+        p.user.toLowerCase().includes(q.toLowerCase())
+    );
+  }, [responseData, fetchLoading, q]);
 
   const columns = [
     { header: "No.", accessor: "no" },
@@ -47,7 +61,7 @@ export default function Databarang() {
         <RowActions
           basePath="/barang"
           id={row.id}
-          onDelete={() => deleteBarangById(row.id)}
+          onDelete={() => deleteBarang.mutate(row.id)}
           getDeleteName={() => row.name} // ✅ gunakan row.name, bukan row.username
         />
       ),
@@ -82,7 +96,11 @@ export default function Databarang() {
           </div>
         </div>
 
-        <Table columns={columns} data={filtered} emptyText={emptyText} />
+        <Table
+          columns={columns}
+          data={transformedBarang}
+          emptyText={emptyText}
+        />
       </div>
     </PageShell>
   );

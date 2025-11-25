@@ -4,42 +4,41 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
 import { login } from "../services";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form"
 
 function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { setAuth } = useContext(AuthContext);
+  const {
+    register,
+    handleSubmit,
+  } = useForm()
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const {mutate, isError, error} = useMutation({
+    mutationFn: login,
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-
-    try {
-      const { username, idUser } = await login(formData);
-      console.log(username, idUser);
-
-      // SIMPAN DATA LOGIN DI LOCALSTORAGE
-      // biar pas refresh halaman, data login ga ilang
-      // dan bisa diakses di context
-      // (tapi kalo mau lebih aman, pake httpOnly cookie aja)
-      localStorage.setItem("username", JSON.stringify(username));
-      localStorage.setItem("idUser", JSON.stringify(idUser));
-      setAuth({ username, idUser });
-
-      navigate("/");
-    } catch (error) {
-      const msg =
-        error?.response?.data?.message || error.message || "Login gagal";
-      console.error("Login error:", msg);
-      setMessage(msg);
-    }
+  const onSubmit = async (data) => {
+    mutate(data, {
+      onSuccess: (data) => {
+        const username = data.username;
+        const idUser = data.idUser;
+        // SIMPAN DATA LOGIN DI LOCALSTORAGE
+        // biar pas refresh halaman, data login ga ilang
+        // dan bisa diakses di context
+        // (tapi kalo mau lebih aman, pake httpOnly cookie aja)
+        localStorage.setItem("username", JSON.stringify(username));
+        localStorage.setItem("idUser", JSON.stringify(idUser));
+        setAuth({ username, idUser });
+    
+        navigate("/");
+      },
+      onError: (error) => {
+        console.log(error);
+      },
+    });
   };
 
   return (
@@ -52,7 +51,7 @@ function Login() {
         />
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           method="POST"
           className="flex flex-col gap-6 justify-center items-center"
         >
@@ -63,11 +62,10 @@ function Login() {
             />
             <Input
               type="email"
-              placeholder="Email"
               name="email"
-              required={true}
-              value={formData.email}
-              onChange={handleChange}
+              placeholder="Email"
+              register={register}
+              required
               className="outline-0 border-0"
             />
           </InputLogin>
@@ -79,11 +77,10 @@ function Login() {
             />
             <Input
               type={showPassword ? "text" : "password"}
-              placeholder="Password"
               name="password"
-              required={true}
-              value={formData.password}
-              onChange={handleChange}
+              placeholder="Password"
+              register={register}
+              required
               className="outline-0 border-0"
             />
             {showPassword ? (
@@ -103,9 +100,9 @@ function Login() {
             )}
           </InputLogin>
 
-          {message && (
+          {isError && (
             <p className="py-2 text-white text-center bg-red-800 rounded w-[60%] mx-auto">
-              {message}
+              {error?.response?.data?.message || error.message || "Login gagal"}
             </p>
           )}
 
